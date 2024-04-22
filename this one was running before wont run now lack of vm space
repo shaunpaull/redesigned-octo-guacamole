@@ -1,0 +1,1071 @@
+
+#include <vector>
+#include <random>
+#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <cmath>
+#include <unordered_map>
+#include <string>
+#include <cassert>
+#include <numeric>
+
+// Initialize random number generator outside to ensure different seeds
+std::random_device rd;
+std::mt19937 gen(rd());
+
+namespace FluidLatticeAI {
+
+// Forward declarations
+class Node;
+class Lattice;
+class MultiscaleLattice;
+class FluidLatticeAI;
+
+// Helper function to generate multi-dimensional Fractal Brownian Motion
+std::vector<std::vector<double>> generateMultiDimFBM(size_t dim, size_t n, double H) {
+    std::normal_distribution<> dis(0, 1);
+
+    std::vector<std::vector<double>> W(dim, std::vector<double>(n, 0.0));
+    for (size_t i = 0; i < dim; ++i) {
+        for (size_t j = 1; j < n; ++j) {
+            double dW = std::pow(j, H - 0.5) * dis(gen);
+            W[i][j] = W[i][j - 1] + dW;
+        }
+    }
+    return W;
+}
+
+// Class for fractional dimensions
+class FractionalDimension {
+public:
+    FractionalDimension(double whole = 0.1, double fractional = 0.0) : whole_(whole), fractional_(fractional) {}
+
+    double getWhole() const { return whole_; }
+    void setWhole(double value) { whole_ = value; }
+    double getFractional() const {
+        assert(fractional_ >= 0.0 && fractional_ <= 1.0);
+        return fractional_;
+    }
+    void setFractional(double value) {
+        assert(value >= 0.0 && value <= 1.0);
+        fractional_ = value;
+    }
+
+private:
+    double whole_;
+    double fractional_;
+};
+
+// Class for nested dimensions
+class NestedDimension {
+public:
+    NestedDimension(double value) : value_(value) {}
+
+    std::shared_ptr<NestedDimension> addNestedDimension(double value) {
+        children_.emplace_back(std::make_shared<NestedDimension>(value));
+        return children_.back();
+    }
+
+    double getValue() const { return value_; }
+    const std::vector<std::shared_ptr<NestedDimension>>& getChildren() const {
+        return children_;
+    }
+
+private:
+    double value_;
+    std::vector<std::shared_ptr<NestedDimension>> children_;
+};
+
+// Node class
+class Node {
+public:
+    enum class NodeType {
+        Standard,
+        Hybrid,
+        Nonlinear
+    };
+
+    Node(NodeType type, size_t flowVectorDimensions, size_t numFractionalDimensions, size_t numPheromoneMarkers, size_t stateDimensions)
+        : type(type),
+          flowVector(flowVectorDimensions, 0.1),
+          adaptability(0.1),
+          randomnessFactor(0.01),
+          state(stateDimensions, 0.01),
+          memory(stateDimensions, 0.01),
+          contextStrength(0.5),
+          attentionFactor(1.0),
+          decayRate(0.01),
+          inhibitionFactor(0.1),
+          learningRate(0.01),
+          fractionalDimensions(numFractionalDimensions),
+          nestedDimension(std::make_shared<NestedDimension>(0.01)),
+          pheromoneMarkers(numPheromoneMarkers, 0.01),
+          specializationFactor(0.5) {
+        std::uniform_real_distribution<> dis(0, 1);
+
+        // Initialize fractionalDimensions
+        for (auto& fractionalDimension : fractionalDimensions) {
+            fractionalDimension.setWhole(std::floor(dis(gen)));
+            fractionalDimension.setFractional(dis(gen));
+        }
+        double norm = 0.0;
+        for (double value : flowVector) {
+            norm += value * value;
+        }
+        norm = std::sqrt(norm);
+        for (double& value : flowVector) {
+            value /= norm;
+        }
+    }
+public:
+    double getLearningRate() const {
+        return learningRate;
+    }
+
+    void setLearningRate(double value) {
+        learningRate = value;
+    }
+
+    double getRegularizationTerm() const {
+        return regularizationTerm;
+    }
+
+    void setRegularizationTerm(double value) {
+        regularizationTerm = value;
+    }    void initialize(size_t stateDimensions, size_t numLayers) {
+        // Resize the state vector to match the desired stateDimensions
+        state.resize(stateDimensions);
+
+        std::uniform_real_distribution<> dis(-1.0, 1.0);
+        for (size_t i = 0; i < stateDimensions; ++i) {
+            state[i] = dis(gen);
+        }
+
+        // Initialize memory with zeros
+        memory = std::vector<double>(stateDimensions, 0.0);
+
+        // Initialize fbmLayers and contextLayers
+        fbmLayers = std::vector<std::vector<std::vector<double>>>(numLayers, std::vector<std::vector<double>>(stateDimensions, std::vector<double>(stateDimensions, 0.0)));
+        contextLayers = std::vector<std::vector<std::vector<double>>>(numLayers, std::vector<std::vector<double>>(stateDimensions, std::vector<double>(stateDimensions, 0.0)));
+
+        std::uniform_real_distribution<> disDimensions(0, 1);
+
+        size_t numNestedDimensions = static_cast<size_t>(disDimensions(gen) * 5);
+        for (size_t i = 0; i < numNestedDimensions; ++i) {
+            nestedDimension->addNestedDimension(disDimensions(gen));
+        }
+    }
+
+    void process(const std::vector<double>& inputSignal, const std::vector<std::shared_ptr<Node>>& neighbors) {
+        std::vector<double> environmentalSignal = calculateEnvironmentalSignal(neighbors);
+        std::vector<double> contextualSignal = calculateContextualSignal(neighbors);
+        std::vector<double> attentionSignal = calculateAttentionSignal(neighbors);
+        std::vector<double> inhibitionSignal = calculateInhibitionSignal(neighbors);
+        adjustState(inputSignal, contextualSignal, attentionSignal, inhibitionSignal);
+        introduceRandomness();
+        updateMemory();
+        adaptToEnvironment(environmentalSignal);
+        updateFbmLayers();
+        updateContextLayers(neighbors);
+        applyDecay();
+        updateSpecialization(neighbors);
+    }
+
+    void activate() {
+        switch (type) {
+            case NodeType::Standard:
+                std::transform(state.begin(), state.end(), state.begin(),
+                               [](double value) { return std::max(0.0, value); });
+                break;
+            case NodeType::Hybrid:
+                std::transform(state.begin(), state.end(), state.begin(), [](double value) {
+                    return std::max(0.0, value) * std::sqrt(std::abs(value));
+                });
+                break;
+            case NodeType::Nonlinear:
+                std::transform(state.begin(), state.end(), state.begin(),
+                               [](double value) { return std::tanh(value); });
+                break;
+        }
+    }
+
+    void learn(const std::vector<double>& errorSignal) {
+        std::vector<double> gradient(state.size());
+        std::transform(errorSignal.begin(), errorSignal.end(), state.begin(), gradient.begin(),
+                       [](double error, double state) {
+            return -2 * error * state;
+        });
+        std::transform(state.begin(), state.end(), gradient.begin(), state.begin(),
+                       [this](double stateValue, double gradientValue) {
+            double fBm = generateFBm();
+            double newState = stateValue + learningRate * (gradientValue - regularizationTerm * stateValue) + fBm;
+            return newState;
+        });
+    }
+
+    const std::vector<double>& getState() const {
+        return state;
+    }
+
+private:
+    NodeType type;
+    std::vector<double> flowVector;
+    double adaptability;
+    double randomnessFactor;
+    std::vector<double> state;
+    std::vector<double> memory;
+    std::vector<std::vector<std::vector<double>>> fbmLayers;
+    std::vector<std::vector<std::vector<double>>> contextLayers;
+    double contextStrength;
+    double attentionFactor;
+    double decayRate;
+    double inhibitionFactor;
+    double learningRate;
+    double regularizationTerm = 0.001; // Regularization term, adjust as needed
+    std::vector<FractionalDimension> fractionalDimensions;
+    std::shared_ptr<NestedDimension> nestedDimension;
+    std::vector<double> pheromoneMarkers;
+    double specializationFactor;
+
+    void adjustState(const std::vector<double>& inputSignal, const std::vector<double>& contextualSignal,
+                        const std::vector<double>& attentionSignal, const std::vector<double>& inhibitionSignal) {
+           // Resize the state vector to match the size of the input vectors
+           state.resize(std::max({inputSignal.size(), contextualSignal.size(), attentionSignal.size(), inhibitionSignal.size()}));
+
+           // Resize the flowVector to match the size of the inputSignal
+           flowVector.resize(inputSignal.size());
+
+           // Resize the fractionalDimensions vector to match the size of the state vector
+           fractionalDimensions.resize(state.size(), FractionalDimension());
+
+           double inputDotFlowVector = std::inner_product(flowVector.begin(), flowVector.end(), inputSignal.begin(), 0.0);
+
+           std::transform(state.begin(), state.end(), inputSignal.begin(), state.begin(),
+                          [&](double stateValue, double input) {
+               return stateValue + adaptability * (inputDotFlowVector * input - stateValue);
+           });
+
+           std::transform(state.begin(), state.end(), attentionSignal.begin(), state.begin(),
+                          [&](double stateValue, double attention) {
+               return stateValue * attention;
+           });
+
+           std::transform(state.begin(), state.end(), inhibitionSignal.begin(), state.begin(),
+                          [&](double stateValue, double inhibition) {
+               return stateValue - inhibitionFactor * inhibition;
+           });
+
+           std::vector<double> tempState(state.size());
+           std::transform(state.begin(), state.end(), fractionalDimensions.begin(), tempState.begin(),
+                          [](double stateValue, const FractionalDimension& fractionalDimension) {
+               double fractionalPart = fractionalDimension.getFractional();
+               return stateValue * std::pow(fractionalPart, 0.1);
+           });
+           state = std::move(tempState);
+
+        std::function<void(std::shared_ptr<NestedDimension>, double)> applyNestedDimension;
+        applyNestedDimension = [&](std::shared_ptr<NestedDimension> dimension, double weight) {
+            std::transform(state.begin(), state.end(), state.begin(), [&](double value) {
+                return value * std::pow(dimension->getValue(), weight);
+            });
+            for (const auto& child : dimension->getChildren()) {
+                applyNestedDimension(child, weight * 0.5);
+            }
+        };
+
+        applyNestedDimension(nestedDimension, 1.0);
+    }
+
+    void introduceRandomness() {
+        std::vector<double> randomSignal = generateMultiDimFBM(1, state.size(), 0.5)[0];
+        std::transform(state.begin(), state.end(), randomSignal.begin(), state.begin(),
+                       [this](double stateValue, double random) {
+            return stateValue + randomnessFactor * random;
+        });
+    }
+
+    void updateMemory() {
+        std::transform(state.begin(), state.end(), memory.begin(), memory.begin(),
+                       [](double stateValue, double memoryValue) {
+            return 0.9 * memoryValue + 0.1 * stateValue;
+        });
+    }
+
+    std::vector<double> calculateEnvironmentalSignal(const std::vector<std::shared_ptr<Node>>& neighbors) {
+        std::vector<double> environmentalSignal(state.size(), 0.0);
+        if (neighbors.empty()) {
+            return environmentalSignal;
+        }
+        for (const auto& neighbor : neighbors) {
+            std::transform(environmentalSignal.begin(), environmentalSignal.end(), neighbor->state.begin(),
+                           environmentalSignal.begin(), std::plus<double>());
+        }
+        std::transform(environmentalSignal.begin(), environmentalSignal.end(), environmentalSignal.begin(),
+                       [&](double value) {
+            return value / neighbors.size();
+        });
+        return environmentalSignal;
+    }
+
+    void adaptToEnvironment(const std::vector<double>& environmentalSignal) {
+        double norm = std::sqrt(std::inner_product(environmentalSignal.begin(), environmentalSignal.end(),
+                                                   environmentalSignal.begin(), 0.0));
+
+        double flowDotEnvironment = std::inner_product(flowVector.begin(), flowVector.end(), environmentalSignal.begin(), 0.0) / norm;
+
+        std::transform(state.begin(), state.end(), environmentalSignal.begin(), state.begin(),
+                       [&](double stateValue, double environmental) {
+            return stateValue + adaptability * (flowDotEnvironment * environmental / norm - stateValue);
+        });
+    }
+
+    void updateFbmLayers() {
+        for (size_t i = 0; i < fbmLayers.size(); ++i) {
+            std::vector<std::vector<double>> fbm = generateMultiDimFBM(state.size(), state.size(), 0.5 + i * 0.1);
+            for (size_t j = 0; j < fbmLayers[i].size(); ++j) {
+                for (size_t k = 0; k < fbmLayers[i][j].size(); ++k) {
+                    fbmLayers[i][j][k] += 0.01 * fbm[j][k];
+                }
+            }
+        }
+    }
+
+    std::vector<double> calculateContextualSignal(const std::vector<std::shared_ptr<Node>>& neighbors) {
+        std::vector<double> contextualSignal(state.size(), 0.0);
+        if (neighbors.empty()) {
+            return contextualSignal;
+        }
+        for (const auto& neighbor : neighbors) {
+            for (const auto& contextLayer : contextLayers) {
+                std::transform(contextualSignal.begin(), contextualSignal.end(), neighbor->state.begin(),
+                               contextualSignal.begin(), [&](double signal, double stateValue) {
+                    double sum = 0.0;
+                    for (size_t i = 0; i < state.size(); ++i) {
+                        if (stateValue >= 0 && static_cast<size_t>(stateValue) < contextLayer[i].size()) {
+                            sum += contextLayer[i][static_cast<size_t>(stateValue)];
+                        }
+                    }
+                    return signal + sum / (neighbors.size() * contextLayers.size());
+                });
+            }
+        }
+        return contextualSignal;
+    }
+
+    void updateContextLayers(const std::vector<std::shared_ptr<Node>>& neighbors) {
+        for (auto& contextLayer : contextLayers) {
+            std::vector<std::vector<double>> newContextLayer(state.size(), std::vector<double>(state.size(), 0.0));
+            for (const auto& neighbor : neighbors) {
+                std::transform(newContextLayer.begin(), newContextLayer.end(), newContextLayer.begin(),
+                                               [&](std::vector<double>& row) {
+                                    std::transform(row.begin(), row.end(), neighbor->getState().begin(), row.begin(),
+                                                   [&](double value, double stateValue) {
+                                        return value + stateValue * stateValue;
+                                    });
+                                    return row;
+                                });
+                            }
+                            for (size_t i = 0; i < contextLayer.size(); ++i) {
+                                for (size_t j = 0; j < contextLayer[i].size(); ++j) {
+                                    contextLayer[i][j] = 0.9 * contextLayer[i][j] + 0.1 * newContextLayer[i][j] / neighbors.size();
+                                }
+                            }
+                        }
+                    }
+
+                    std::vector<double> calculateAttentionSignal(const std::vector<std::shared_ptr<Node>>& neighbors) {
+                        std::vector<double> attentionSignal(state.size(), 1.0);
+                        if (neighbors.empty()) {
+                            return attentionSignal;
+                        }
+                        double maxSimilarity = 0.0;
+                        for (const auto& neighbor : neighbors) {
+                            double dotProduct = std::inner_product(state.begin(), state.end(), neighbor->getState().begin(), 0.0);
+                            double stateNorm = std::sqrt(std::inner_product(state.begin(), state.end(), state.begin(), 0.0));
+                            double neighborNorm = std::sqrt(std::inner_product(neighbor->getState().begin(), neighbor->getState().end(), neighbor->getState().begin(), 0.0));
+                            double similarity = dotProduct / (stateNorm * neighborNorm);
+                            maxSimilarity = std::max(maxSimilarity, similarity);
+                        }
+                        std::transform(attentionSignal.begin(), attentionSignal.end(), attentionSignal.begin(), [&](double value) {
+                            return value * (1.0 + attentionFactor * maxSimilarity);
+                        });
+                        return attentionSignal;
+                    }
+
+                    std::vector<double> calculateInhibitionSignal(const std::vector<std::shared_ptr<Node>>& neighbors) {
+                        std::vector<double> inhibitionSignal(state.size(), 0.0);
+                        for (const auto& neighbor : neighbors) {
+                            double dotProduct = std::inner_product(state.begin(), state.end(), neighbor->getState().begin(), 0.0);
+                            if (dotProduct < 0) {
+                                std::transform(inhibitionSignal.begin(), inhibitionSignal.end(), neighbor->getState().begin(),
+                                               inhibitionSignal.begin(), std::plus<double>());
+                            }
+                        }
+                        return inhibitionSignal;
+                    }
+
+                    void applyDecay() {
+                        std::transform(state.begin(), state.end(), state.begin(), [this](double value) {
+                            return value * (1.0 - decayRate);
+                        });
+                    }
+
+                    void updatePheromoneMarkers(const std::vector<std::shared_ptr<Node>>& neighbors) {
+                        for (size_t i = 0; i < pheromoneMarkers.size(); ++i) {
+                            double avgPheromone = 0.0;
+                            for (const auto& neighbor : neighbors) {
+                                avgPheromone += neighbor->pheromoneMarkers[i];
+                            }
+                            avgPheromone /= neighbors.size();
+                            pheromoneMarkers[i] = 0.9 * pheromoneMarkers[i] + 0.1 * avgPheromone;
+                        }
+                    }
+
+                    void releasePheromones() {
+                        std::transform(pheromoneMarkers.begin(), pheromoneMarkers.end(), pheromoneMarkers.begin(),
+                                       [](double marker) {
+                            return marker + 0.1;
+                        });
+                    }
+
+                    void updateSpecialization(const std::vector<std::shared_ptr<Node>>& neighbors) {
+                        double avgSpecializationFactor = std::accumulate(neighbors.begin(), neighbors.end(), 0.0,
+                                                                         [](double sum, const std::shared_ptr<Node>& neighbor) {
+                            return sum + neighbor->specializationFactor;
+                        }) / neighbors.size();
+                        specializationFactor = 0.9 * specializationFactor + 0.1 * avgSpecializationFactor;
+
+                        std::uniform_real_distribution<> dis(0.0, 1.0);
+                        double randomValue = dis(gen);
+                        if (randomValue < specializationFactor) {
+                            type = static_cast<NodeType>(rand() % 3);
+                        }
+                    }
+
+                    double generateFBm() {
+                        double fBm = 0.01;
+                        double persistence = 0.5;
+                        double frequency = 1.0;
+                        double amplitude = 0.01; // Adjust the fBm scale as needed
+
+                        for (int i = 0; i < 5; ++i) { // Adjust the number of octaves as needed
+                            fBm += amplitude * generateNoise(frequency);
+                            frequency *= 2.0;
+                            amplitude *= persistence;
+                        }
+
+                        return fBm;
+                    }
+
+                    double generateNoise(double frequency) {
+                        static std::random_device rd;
+                        static std::mt19937 gen(rd());
+                        static std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+
+                        return distribution(gen) / frequency;
+                    }
+
+                    friend class Lattice;
+                };
+
+                class Lattice {
+                public:
+                    static std::shared_ptr<Lattice> create(const std::vector<size_t>& dimensions, size_t flowVectorDimensions,
+                                                           size_t numFractionalDimensions, size_t numPheromoneMarkers,
+                                                           double globalLearningRate = 0.01, double interactionStrength = 0.1) {
+                        return std::shared_ptr<Lattice>(new Lattice(dimensions, flowVectorDimensions, numFractionalDimensions,
+                                                                    numPheromoneMarkers, globalLearningRate, interactionStrength));
+                    }
+
+                    std::vector<double> propagate(const std::vector<double>& inputSignal, size_t radius) {
+                        size_t index = get1DIndex(getNDIndices(inputSignal));
+                        std::vector<std::shared_ptr<Node>> neighbors = getNeighbors(getNDIndices(index), radius);
+                        nodes[index]->process(inputSignal, neighbors);
+                        nodes[index]->activate();
+                        return nodes[index]->getState();
+                    }
+
+                    void learn(const std::vector<double>& targetSignal) {
+                        std::vector<double> errorSignal(targetSignal.size());
+                        std::transform(targetSignal.begin(), targetSignal.end(), nodes.back()->getState().begin(),
+                                       errorSignal.begin(), std::minus<double>());
+
+                        for (size_t i = nodes.size(); i-- > 0;) {
+                            nodes[i]->learn(errorSignal);
+                            double flowDotError = std::inner_product(nodes[i]->flowVector.begin(), nodes[i]->flowVector.end(),
+                                                                     errorSignal.begin(), 0.0);
+                            std::transform(errorSignal.begin(), errorSignal.end(), nodes[i]->flowVector.begin(),
+                                           errorSignal.begin(), [&](double error, double flowValue) {
+                                return flowDotError * flowValue;
+                            });
+                        }
+                    }
+
+                    void adaptDimensions(const std::vector<size_t>& newDimensions, double performanceMetric) {
+                        dimensions = newDimensions;
+                        size_t totalNodes = std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>());
+                        nodes.resize(totalNodes);
+                        for (size_t i = nodes.size(); i < totalNodes; ++i) {
+                            Node::NodeType type = static_cast<Node::NodeType>(i % 3);
+                            nodes[i] = std::shared_ptr<Node>(new Node(type, nodes[0]->flowVector.size(), numFractionalDimensions,
+                                                                      numPheromoneMarkers, dimensions[0]));
+                            nodes[i]->initialize(nodes[0]->getState().size(), nodes[0]->fbmLayers.size());
+                        }
+                    }
+
+                    void updateFlowVectors() {
+                        std::random_device rd;
+                        std::mt19937 gen(rd());
+
+                        for (auto& node : nodes) {
+                            std::vector<double> randomVector(node->flowVector.size());
+                            std::uniform_real_distribution<double> dis(-1.0, 1.0);
+                            std::generate(randomVector.begin(), randomVector.end(), [&dis, &gen]() { return dis(gen); });
+                            double norm = std::sqrt(std::inner_product(randomVector.begin(), randomVector.end(), randomVector.begin(), 0.0));
+                            std::transform(randomVector.begin(), randomVector.end(), randomVector.begin(), [&norm](double value) {
+                                return value / norm;
+                            });
+                            node->flowVector = std::move(randomVector);
+                        }
+                    }
+                public:
+                    double getGlobalLearningRate() const {
+                        return globalLearningRate;
+                    }
+
+                    void setGlobalLearningRate(double value) {
+                        globalLearningRate = value;
+                    }
+                    std::unordered_map<std::string, std::vector<double>> getEmergenceMetrics() const {
+                        std::unordered_map<std::string, std::vector<double>> metrics;
+                        std::vector<double> stateMagnitudes;
+                        std::vector<double> memoryMagnitudes;
+                        std::vector<double> fbmComplexities;
+                        std::vector<double> contextStrengths;
+
+                        stateMagnitudes.reserve(nodes.size());
+                        memoryMagnitudes.reserve(nodes.size());
+                        fbmComplexities.reserve(nodes.size());
+                        contextStrengths.reserve(nodes.size());
+
+                        std::transform(nodes.begin(), nodes.end(), std::back_inserter(stateMagnitudes),
+                                       [](const std::shared_ptr<Node>& node) {
+                            return std::sqrt(std::inner_product(node->getState().begin(), node->getState().end(),
+                                                                node->getState().begin(), 0.0));
+                        });
+
+                        std::transform(nodes.begin(), nodes.end(), std::back_inserter(memoryMagnitudes),
+                                       [](const std::shared_ptr<Node>& node) {
+                            return std::sqrt(std::inner_product(node->memory.begin(), node->memory.end(),
+                                                                node->memory.begin(), 0.0));
+                        });
+
+                        std::transform(nodes.begin(), nodes.end(), std::back_inserter(fbmComplexities),
+                                       [](const std::shared_ptr<Node>& node) {
+                            double fbmComplexity = 0.0;
+                            for (const auto& layer : node->fbmLayers) {
+                                for (const auto& row : layer) {
+                                    fbmComplexity += std::accumulate(row.begin(), row.end(), 0.0);
+                                }
+                            }
+                            return fbmComplexity;
+                        });
+
+                        std::transform(nodes.begin(), nodes.end(), std::back_inserter(contextStrengths),
+                                       [](const std::shared_ptr<Node>& node) {
+                            return node->contextStrength;
+                        });
+
+                        metrics["stateMagnitude"] = std::move(stateMagnitudes);
+                        metrics["memoryMagnitude"] = std::move(memoryMagnitudes);
+                        metrics["fbmComplexity"] = std::move(fbmComplexities);
+                        metrics["contextStrength"] = std::move(contextStrengths);
+
+                        return metrics;
+                    }
+
+                    void updatePheromoneMarkers() {
+                        for (size_t i = 0; i < nodes.size(); ++i) {
+                            std::vector<size_t> indices = getNDIndices(i);
+                            std::vector<std::shared_ptr<Node>> neighbors = getNeighbors(indices, 1);
+                            nodes[i]->updatePheromoneMarkers(neighbors);
+                            nodes[i]->releasePheromones();
+                        }
+                    }
+
+                    void updateInteractions(const std::vector<std::shared_ptr<Lattice>>& otherLattices) {
+                        for (size_t i = 0; i < nodes.size(); ++i) {
+                            std::vector<size_t> indices = getNDIndices(i);
+                            for (const auto& otherLattice : otherLattices) {
+                                std::vector<std::shared_ptr<Node>> otherNeighbors = otherLattice->getNeighbors(indices, 1);
+                                for (const auto& otherNeighbor : otherNeighbors) {
+                                    std::vector<double>& nodeState = nodes[i]->state;
+                                    const auto& otherState = otherNeighbor->getState();
+
+                                    std::transform(nodeState.begin(), nodeState.end(), otherState.begin(), nodeState.begin(),
+                                                   [this](double state, double otherState) {
+                                        return state + interactionStrength * otherState;
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    const std::vector<std::shared_ptr<Node>>& getNodes() const {
+                        return nodes;
+                    }
+
+                private:
+                    std::vector<std::shared_ptr<Node>> nodes;
+                    std::vector<size_t> dimensions;
+                    double globalLearningRate;
+                    size_t numFractionalDimensions;
+                    size_t numPheromoneMarkers;
+                    double interactionStrength;
+
+                    std::vector<std::shared_ptr<Node>> getNeighbors(const std::vector<size_t>& indices, size_t radius) const {
+                        std::vector<std::shared_ptr<Node>> neighbors;
+                        std::vector<size_t> radii(dimensions.size(), radius);
+                        getNeighborsRecursive(indices, radii, 0, indices, neighbors);
+                        return neighbors;
+                    }
+
+                    void getNeighborsRecursive(const std::vector<size_t>& indices, const std::vector<size_t>& radii,
+                                               size_t dimension, std::vector<size_t> currentIndices,
+                                               std::vector<std::shared_ptr<Node>>& neighbors) const {
+                        if (dimension == indices.size()) {
+                            if (currentIndices != indices) {
+                                neighbors.push_back(nodes[get1DIndex(currentIndices)]);
+                            }
+                        } else {
+                            for (size_t i = 0; i <= 2 * radii[dimension]; ++i) {
+                                size_t newIndex = (indices[dimension] + i - radii[dimension] + dimensions[dimension]) % dimensions[dimension];
+                                currentIndices[dimension] = newIndex;
+                                getNeighborsRecursive(indices, radii, dimension + 1, currentIndices, neighbors);
+                            }
+                        }
+                    }
+
+                    size_t get1DIndex(const std::vector<size_t>& indices) const {
+                        size_t index = 0;
+                        size_t multiplier = 1;
+                        for (size_t i = dimensions.size(); i-- > 0;) {
+                            index += indices[i] * multiplier;
+                            multiplier *= dimensions[i];
+                        }
+                        return index;
+                    }
+
+                    Lattice(const std::vector<size_t>& dimensions, size_t flowVectorDimensions, size_t numFractionalDimensions,
+                            size_t numPheromoneMarkers, double globalLearningRate, double interactionStrength)
+                        : dimensions(dimensions),
+                          globalLearningRate(globalLearningRate),
+                          numFractionalDimensions(numFractionalDimensions),
+                          numPheromoneMarkers(numPheromoneMarkers),
+                          interactionStrength(interactionStrength) {
+                        size_t totalNodes = std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>());
+                        nodes.reserve(totalNodes);
+                        for (size_t i = 0; i < totalNodes; ++i) {Node::NodeType type = static_cast<Node::NodeType>(i % 3);
+                            nodes.push_back(std::shared_ptr<Node>(new Node(type, flowVectorDimensions, numFractionalDimensions,
+                                                                           numPheromoneMarkers, dimensions[0])));
+                        }
+                    }
+
+                    std::vector<size_t> getNDIndices(size_t index) const {
+                        std::vector<size_t> indices(dimensions.size());
+                        for (size_t i = dimensions.size(); i-- > 0;) {
+                            indices[i] = index % dimensions[i];
+                            index /= dimensions[i];
+                        }
+                        return indices;
+                    }
+
+                    std::vector<size_t> getNDIndices(const std::vector<double>& inputSignal) const {
+                        std::vector<size_t> indices(dimensions.size());
+                        for (size_t i = 0; i < dimensions.size(); ++i) {
+                            indices[i] = static_cast<size_t>(inputSignal[i] * dimensions[i]);
+                        }
+                        return indices;
+                    }
+                };
+
+                class MultiscaleLattice {
+                public:
+                    static std::shared_ptr<MultiscaleLattice> create(const std::vector<size_t>& baseDimensions, size_t flowVectorDimensions,
+                                                                     size_t numFractionalDimensions, size_t numPheromoneMarkers, size_t numScales,
+                                                                     double globalLearningRate = 0.01) {
+                        return std::shared_ptr<MultiscaleLattice>(new MultiscaleLattice(baseDimensions, flowVectorDimensions, numFractionalDimensions,
+                                                                                        numPheromoneMarkers, numScales, globalLearningRate));
+                    }
+
+                    void initialize(size_t stateDimensions, size_t numLayers) {
+                        for (const auto& lattice : lattices) {
+                            for (const auto& node : lattice->getNodes()) {
+                                node->initialize(stateDimensions, numLayers);
+                            }
+                        }
+                    }
+
+                    std::vector<double> propagate(const std::vector<double>& inputSignal, size_t radius) {
+                        std::vector<double> outputSignal = inputSignal;
+                        for (auto& lattice : lattices) {
+                            outputSignal = lattice->propagate(outputSignal, radius);
+                        }
+                        return outputSignal;
+                    }
+
+                    void learn(const std::vector<double>& targetSignal) {
+                        std::vector<double> errorSignal = targetSignal;
+                        for (size_t i = lattices.size(); i-- > 0;) {
+                            lattices[i]->learn(errorSignal);
+                            errorSignal = lattices[i]->getNodes().back()->getState();
+                        }
+                        updateGlobalLearningRate();
+                    }
+
+                    void adaptDimensions(const std::vector<size_t>& newBaseDimensions, double performanceMetric) {
+                        for (size_t i = 0; i < lattices.size(); ++i) {
+                            std::vector<size_t> scaledDimensions(newBaseDimensions.size());
+                            for (size_t j = 0; j < newBaseDimensions.size(); ++j) {
+                                scaledDimensions[j] = static_cast<size_t>(newBaseDimensions[j] * scaleFactors[i] * (1.0 + 0.1 * performanceMetric));
+                            }
+                            lattices[i]->adaptDimensions(scaledDimensions, performanceMetric);
+                        }
+                    }
+
+                    void updateFlowVectors() {
+                        for (auto& lattice : lattices) {
+                            lattice->updateFlowVectors();
+                        }
+                    }
+
+                    std::unordered_map<std::string, std::vector<std::vector<double>>> getEmergenceMetrics() const {
+                        std::unordered_map<std::string, std::vector<std::vector<double>>> metrics;
+                        for (const auto& lattice : lattices) {
+                            auto latticeMetrics = lattice->getEmergenceMetrics();
+                            for (const auto& [metricName, metricValues] : latticeMetrics) {
+                                metrics[metricName].push_back(metricValues);
+                            }
+                        }
+                        return metrics;
+                    }
+
+                    void updatePheromoneMarkers() {
+                        for (auto& lattice : lattices) {
+                            lattice->updatePheromoneMarkers();
+                        }
+                    }
+
+                    void updateInteractions() {
+                        for (size_t i = 0; i < lattices.size(); ++i) {
+                            std::vector<std::shared_ptr<Lattice>> otherLattices;
+                            if (i > 0) {
+                                otherLattices.push_back(lattices[i - 1]);
+                            }
+                            if (i < lattices.size() - 1) {
+                                otherLattices.push_back(lattices[i + 1]);
+                            }
+                            lattices[i]->updateInteractions(otherLattices);
+                        }
+                    }
+
+                    const std::vector<std::shared_ptr<Lattice>>& getLattices() const {
+                        return lattices;
+                    }
+
+                private:
+                    std::vector<std::shared_ptr<Lattice>> lattices;
+                    std::vector<double> scaleFactors;
+                    double globalLearningRate;
+                    size_t numFractionalDimensions;
+                    size_t numPheromoneMarkers;
+
+                    MultiscaleLattice(const std::vector<size_t>& baseDimensions, size_t flowVectorDimensions,
+                                      size_t numFractionalDimensions, size_t numPheromoneMarkers, size_t numScales,
+                                      double globalLearningRate = 0.01)
+                        : scaleFactors(numScales),
+                          globalLearningRate(globalLearningRate),
+                          numFractionalDimensions(numFractionalDimensions),
+                          numPheromoneMarkers(numPheromoneMarkers) {
+                        for (size_t i = 0; i < numScales; ++i) {
+                            scaleFactors[i] = std::pow(2, i);
+                            lattices.push_back(Lattice::create(baseDimensions, flowVectorDimensions, numFractionalDimensions,
+                                                               numPheromoneMarkers, globalLearningRate));
+                        }
+                    }
+
+                    void updateGlobalLearningRate() {
+                        double avgError = 0.0;
+                        for (const auto& lattice : lattices) {
+                            const auto& backNode = lattice->getNodes().back();
+                            const auto& prevNode = lattice->getNodes()[lattice->getNodes().size() - 2];
+                            double error = std::inner_product(backNode->getState().begin(), backNode->getState().end(),
+                                                              prevNode->getState().begin(), 0.0, std::plus<double>(),
+                                                              [](double backState, double prevState) {
+                                return (backState - prevState) * (backState - prevState);
+                            });
+                            error = std::sqrt(error);
+                            avgError += error;
+                        }
+                        avgError /= lattices.size();
+                        globalLearningRate *= (1.0 - 0.01 * avgError);
+                    }
+                };
+
+                class FluidLatticeAI {
+                public:
+                    static std::shared_ptr<FluidLatticeAI> create(const std::vector<size_t>& baseDimensions, size_t flowVectorDimensions,
+                                                                  size_t numFractionalDimensions, size_t numPheromoneMarkers, size_t numScales,
+                                                                  double globalLearningRate = 0.01) {
+                        return std::shared_ptr<FluidLatticeAI>(new FluidLatticeAI(baseDimensions, flowVectorDimensions, numFractionalDimensions,
+                                                                                  numPheromoneMarkers, numScales, globalLearningRate));
+                    }
+
+                    void initialize(size_t stateDimensions, size_t numLayers) {
+                        multiscaleLattice->initialize(stateDimensions, numLayers);
+                    }
+
+                    std::vector<double> process(const std::vector<double>& inputSignal, size_t radius) {
+                        return multiscaleLattice->propagate(inputSignal, radius);
+                    }
+
+                    void learn(const std::vector<double>& targetSignal) {
+                        multiscaleLattice->learn(targetSignal);
+                    }
+
+                    void adaptDimensions(const std::vector<size_t>& newBaseDimensions) {
+                        multiscaleLattice->adaptDimensions(newBaseDimensions, performanceMetric);
+                    }
+
+                    void updateFlowVectors() {
+                        multiscaleLattice->updateFlowVectors();
+                    }
+
+                    std::unordered_map<std::string, std::vector<std::vector<double>>> getEmergenceMetrics() const {
+                        return multiscaleLattice->getEmergenceMetrics();
+                    }
+
+                    void updatePheromoneMarkers() {
+                        multiscaleLattice->updatePheromoneMarkers();
+                    }
+
+                    void updateInteractions() {
+                        multiscaleLattice->updateInteractions();
+                    }
+
+                    void updateInputSignal(const std::vector<double>& newInputSignal) {
+                        inputSignal = newInputSignal;
+                    }
+
+                    void updatePerformanceMetric(double newPerformanceMetric) {
+                        performanceMetric = newPerformanceMetric;
+                    }
+
+                    void adapt() {
+                        std::vector<size_t> newBaseDimensions(inputSignal.size());
+                        std::transform(inputSignal.begin(), inputSignal.end(), newBaseDimensions.begin(),
+                                       [this](double signal) {
+                            return static_cast<size_t>(signal * (1.0 + 0.1 * performanceMetric));
+                        });
+                        adaptDimensions(newBaseDimensions);
+                    }
+
+                    std::vector<double> generateCreativeOutput(const std::vector<double>& inputSignal, size_t numIterations) {
+                        std::vector<double> outputSignal = inputSignal;
+                        for (size_t i = 0; i < numIterations; ++i) {
+                            outputSignal = process(outputSignal, 1);
+                        }
+                        return outputSignal;
+                    }
+
+                    double optimizeHyperparameters(const std::function<double(const std::vector<double>&)>& fitnessFunction,
+                                                   size_t numGenerations, size_t populationSize) {
+                        std::vector<double> bestParameters;
+                        double bestFitness = -std::numeric_limits<double>::infinity();
+
+                        for (size_t generation = 0; generation < numGenerations; ++generation) {
+                            std::vector<std::vector<double>> population(populationSize);
+                            std::vector<double> fitnessValues(populationSize);
+
+                            std::generate(population.begin(), population.end(), [this]() {
+                                return generateRandomParameters();
+                            });
+
+                            std::transform(population.begin(), population.end(), fitnessValues.begin(),
+                                           [&fitnessFunction](const std::vector<double>& parameters) {
+                                return fitnessFunction(parameters);
+                            });
+
+                            auto bestIt = std::max_element(fitnessValues.begin(), fitnessValues.end());
+                            if (*bestIt > bestFitness) {
+                                bestFitness = *bestIt;
+                                bestParameters = population[std::distance(fitnessValues.begin(), bestIt)];
+                            }
+
+                            std::vector<std::vector<double>> newPopulation;
+                            for (size_t i = 0; i < populationSize; ++i) {
+                                std::vector<double> parent1 = selectParent(population, fitnessValues);
+                                std::vector<double> parent2 = selectParent(population, fitnessValues);
+                                std::vector<double> offspring = crossover(parent1, parent2);
+                                mutate(offspring);
+                                newPopulation.push_back(offspring);
+                            }
+
+                            population = newPopulation;
+                        }
+
+                        // Set the best hyperparameters found
+                        multiscaleLattice->getLattices()[0]->setGlobalLearningRate(bestParameters[0]);
+                        for (auto& node : multiscaleLattice->getLattices()[0]->getNodes()) {
+                            node->setLearningRate(bestParameters[0]);
+                            node->setRegularizationTerm(bestParameters[1]);
+                        }
+
+                        return bestFitness;
+                    }
+
+                    const std::shared_ptr<MultiscaleLattice>& getMultiscaleLattice() const {
+                        return multiscaleLattice;
+                    }
+
+                private:
+                    std::shared_ptr<MultiscaleLattice> multiscaleLattice;
+                    std::vector<double> inputSignal;
+                    double performanceMetric;
+
+                    FluidLatticeAI(const std::vector<size_t>& baseDimensions, size_t flowVectorDimensions,
+                                   size_t numFractionalDimensions, size_t numPheromoneMarkers, size_t numScales,
+                                   double globalLearningRate = 0.01)
+                        : multiscaleLattice(MultiscaleLattice::create(baseDimensions, flowVectorDimensions, numFractionalDimensions,
+                                                                      numPheromoneMarkers, numScales, globalLearningRate)),
+                          inputSignal(baseDimensions[0], 0.0),
+                          performanceMetric(0.0) {}
+
+                    std::vector<double> generateRandomParameters() {
+                        std::vector<double> parameters;
+                        std::uniform_real_distribution<double> dist(0.0, 1.0);
+                        double learningRate = dist(gen);
+                        double regularization = dist(gen);
+                        parameters.push_back(learningRate);
+                        parameters.push_back(regularization);
+                        return parameters;
+                    }
+
+                    std::vector<double> selectParent(const std::vector<std::vector<double>>& population,
+                                                     const std::vector<double>& fitnessValues) {
+                        size_t tournamentSize = 3;
+                        std::uniform_int_distribution<size_t> dist(0, population.size() - 1);
+                        std::vector<size_t> participants(tournamentSize);
+                        for (size_t i = 0; i < tournamentSize; ++i) {
+                            participants[i] = dist(gen);
+                        }
+                        double bestFitness = -std::numeric_limits<double>::infinity();
+                        size_t bestIndex = 0;
+                        for (size_t i = 0; i < tournamentSize; ++i) {
+                            if (fitnessValues[participants[i]] > bestFitness) {
+                                bestFitness = fitnessValues[participants[i]];
+                                bestIndex = participants[i];
+                            }
+                        }
+                        return population[bestIndex];
+                    }
+
+                    std::vector<double> crossover(const std::vector<double>& parent1, const std::vector<double>& parent2) {
+                        std::vector<double> offspring(parent1.size());
+                        std::uniform_real_distribution<double> dist(0.0, 1.0);
+                        std::transform(parent1.begin(), parent1.end(), parent2.begin(), offspring.begin(),
+                                       [&dist](double p1, double p2) {
+                            double randomValue = dist(gen);
+                            return randomValue * p1 + (1.0 - randomValue) * p2;
+                        });
+                        return offspring;
+                    }
+
+                    void mutate(std::vector<double>& individual) {
+                        std::uniform_real_distribution<double> dist(-0.1, 0.1);
+                        std::transform(individual.begin(), individual.end(), individual.begin(), [&dist](double value) {
+                            double mutationValue = dist(gen);
+                            return value + mutationValue;
+                        });
+                    }
+                };
+
+// Pattern Recognition Task
+void patternRecognitionTask(FluidLatticeAI& fluidLatticeAI, int numEpochs) {
+    // Define input patterns and corresponding target patterns
+    std::vector<std::vector<double>> inputPatterns = {
+        {0, 0},
+        {0, 1},
+        {1, 0},
+        {1, 1}
+    };
+
+    std::vector<std::vector<double>> targetPatterns = {
+        {0},
+        {1},
+        {1},
+        {0}
+    };
+
+    // Train the Fluid Lattice AI
+    for (int epoch = 0; epoch < numEpochs; ++epoch) {
+        for (size_t i = 0; i < inputPatterns.size(); ++i) {
+            std::vector<double> outputSignal = fluidLatticeAI.process(inputPatterns[i], 1);
+            fluidLatticeAI.learn(targetPatterns[i]);
+        }
+
+        // Evaluate the performance after each epoch
+        double totalError = 0.001;
+        for (size_t i = 0; i < inputPatterns.size(); ++i) {
+            std::vector<double> outputSignal = fluidLatticeAI.process(inputPatterns[i], 1);
+            double error = 0.0;
+            for (size_t j = 0; j < outputSignal.size(); ++j) {
+                error += std::pow(outputSignal[j] - targetPatterns[i][j], 2);
+            }
+            totalError += error;
+        }
+        double avgError = totalError / inputPatterns.size();
+        std::cout << "Epoch: " << epoch << ", Average Error: " << avgError << std::endl;
+    }
+
+    // Test the trained Fluid Lattice AI
+    std::cout << "Testing the trained Fluid Lattice AI:" << std::endl;
+    for (size_t i = 0; i < inputPatterns.size(); ++i) {
+        std::vector<double> outputSignal = fluidLatticeAI.process(inputPatterns[i], 1);
+        std::cout << "Input: ";
+        for (double value : inputPatterns[i]) {
+            std::cout << value << " ";
+        }
+        std::cout << "Output: ";
+        for (double value : outputSignal) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+} // namespace FluidLatticeAI
+
+int main() {
+    std::vector<size_t> baseDimensions = {1, 2, 2,};
+    size_t flowVectorDimensions = 1;
+    size_t numFractionalDimensions = 1;
+    size_t numPheromoneMarkers = 2;
+    size_t numScales = 1;
+    double globalLearningRate = 1;
+    
+    std::shared_ptr<FluidLatticeAI::FluidLatticeAI> fluidLatticeAI = FluidLatticeAI::FluidLatticeAI::create(
+                                                                                                            baseDimensions, flowVectorDimensions, numFractionalDimensions, numPheromoneMarkers, numScales, globalLearningRate
+                                                                                                            );
+    size_t stateDimensions = 2;
+    size_t numLayers = 2;
+    fluidLatticeAI->initialize(stateDimensions, numLayers);
+    
+    // Pattern Recognition Task
+    int numEpochs = 50;
+    FluidLatticeAI::patternRecognitionTask(*fluidLatticeAI, numEpochs);
+    
+    return 0;
+}
