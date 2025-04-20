@@ -1,0 +1,5291 @@
+/*
+ * Integrated AGI System Implementation
+ * 
+ * This implementation integrates core concepts from the AGI framework including:
+ * - Universal Data Representation System (UDRS)
+ * - Fluid Lattice AI with dynamic node structures
+ * - Multi-dimensional Fractal Brownian Motion (FBM)
+ * - Knowledge graph representation and learning
+ * - Pattern recognition and basic reasoning capabilities
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <time.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <float.h>
+#include <assert.h>
+
+/* ===============================
+ * Constants and Configurations
+ * =============================== */
+#define MAX_DIMENSIONS 10
+#define MAX_NODES 1000
+#define MAX_CONNECTIONS 10000
+#define MAX_STRING_LENGTH 256
+#define MAX_ARRAY_LENGTH 1024
+#define INITIAL_LEARNING_RATE 0.01
+#define DEFAULT_ADAPTABILITY 0.1
+#define MAX_PATTERNS 100
+#define MAX_GOALS 50
+#define MAX_SCENARIOS 20
+#define MAX_EVENTS 100
+#define MAX_ACTIONS 100
+#define MAX_CONCEPTS 500
+#define MAX_ENTITIES 500
+#define MAX_WORKERS 16
+#define LATTICE_DEFAULT_RADIUS 2
+#define DEFAULT_HURST_EXPONENT 0.75
+
+/* ===============================
+ * Type Definitions
+ * =============================== */
+
+// Forward declarations
+typedef struct Node Node;
+typedef struct Lattice Lattice;
+typedef struct MultiscaleLattice MultiscaleLattice;
+typedef struct FluidLatticeAI FluidLatticeAI;
+typedef struct KnowledgeGraph KnowledgeGraph;
+typedef struct Experience Experience;
+typedef struct Event Event;
+typedef struct Goal Goal;
+typedef struct Action Action;
+typedef struct Concept Concept;
+typedef struct Pattern Pattern;
+typedef struct Constraint Constraint;
+typedef struct Scenario Scenario;
+typedef struct ReinforcementLearning ReinforcementLearning;
+typedef struct LearningStrategy LearningStrategy;
+typedef struct AGI AGI;
+
+// Enumerations
+typedef enum {
+    UDRS_UNKNOWN,
+    UDRS_DOUBLE,
+    UDRS_INT,
+    UDRS_STRING,
+    UDRS_ARRAY,
+    UDRS_LIGHT_PATTERN,
+    UDRS_SOUND_PATTERN,
+    UDRS_METRIC,
+    UDRS_IMAGE,
+    UDRS_AUDIO,
+    UDRS_TEXT,
+    UDRS_STRUCT
+} UDRSDataType;
+
+typedef enum {
+    NODE_STANDARD,
+    NODE_HYBRID,
+    NODE_NONLINEAR
+} NodeType;
+
+typedef enum {
+    FUSION_NONE,
+    FUSION_AVERAGE,
+    FUSION_WEIGHTED_AVERAGE,
+    FUSION_MEDIAN
+} FusionType;
+
+typedef enum {
+    METRIC_CONSCIOUSNESS,
+    METRIC_SPIRIT_LEVEL,
+    METRIC_FLOW_LEVEL
+} MetricType;
+
+typedef enum {
+    PATTERN_LIGHT,
+    PATTERN_SOUND,
+    PATTERN_CONCEPT,
+    PATTERN_BEHAVIOR
+} PatternType;
+
+// Structures for UDRS (Universal Data Representation System)
+typedef union {
+    double double_value;
+    int int_value;
+    char string_value[MAX_STRING_LENGTH];
+    double array_value[MAX_ARRAY_LENGTH];
+    void* ptr_value;
+} UDRSValue;
+
+typedef struct {
+    UDRSDataType type;
+    UDRSValue value;
+    char tag[MAX_STRING_LENGTH];
+    time_t timestamp;
+} UDRSData;
+
+// Structures for Pattern Recognition
+typedef struct {
+    double intensities[MAX_ARRAY_LENGTH];
+    int num_intensities;
+    double average_intensity;
+    double dominant_frequency;
+} LightPattern;
+
+typedef struct {
+    double amplitudes[MAX_ARRAY_LENGTH];
+    int num_amplitudes;
+    double average_volume;
+    double dominant_frequency;
+    int pattern_type;
+    int duration;
+} SoundPattern;
+
+typedef struct {
+    MetricType type;
+    double current_value;
+    double recent_history[MAX_ARRAY_LENGTH];
+    int history_size;
+} Metric;
+
+// Structures for Multidimensional FBM
+typedef struct {
+    int dimensions;
+    double hurst_exponent;
+    double** values; // 2D array: [dimension][sample]
+    int samples;
+} MultidimensionalFBM;
+
+// Nested Dimension Structure
+typedef struct NestedDimension {
+    double value;
+    struct NestedDimension** children;
+    int num_children;
+    int max_children;
+} NestedDimension;
+
+// Fractional Dimension Structure
+typedef struct {
+    double whole;
+    double fractional;
+} FractionalDimension;
+
+// Node Structure for FluidLatticeAI
+struct Node {
+    NodeType type;
+    double* flow_vector;
+    int flow_vector_dimensions;
+    double adaptability;
+    double randomness_factor;
+    double* state;
+    int state_dimensions;
+    double* memory;
+    double context_strength;
+    double attention_factor;
+    double decay_rate;
+    double inhibition_factor;
+    double learning_rate;
+    double regularization_term;
+    FractionalDimension* fractional_dimensions;
+    int num_fractional_dimensions;
+    NestedDimension* nested_dimension;
+    double* pheromone_markers;
+    int num_pheromone_markers;
+    double specialization_factor;
+    double total_dynamism;
+    
+    // Function pointers for node operations
+    void (*initialize)(struct Node*, int, int);
+    void (*process)(struct Node*, const double*, int, struct Node**, int);
+    void (*activate)(struct Node*);
+    void (*learn)(struct Node*, const double*, int);
+    double* (*get_state)(const struct Node*);
+    int (*get_state_dim)(const struct Node*);
+    double (*get_learning_rate)(const struct Node*);
+    void (*set_learning_rate)(struct Node*, double);
+};
+
+// Lattice Structure
+struct Lattice {
+    Node** nodes;
+    int* dimensions;
+    int num_dimensions;
+    int total_nodes;
+    double global_learning_rate;
+    
+    // Function pointers for lattice operations
+    double* (*propagate)(struct Lattice*, const double*, int, int);
+    void (*learn)(struct Lattice*, const double*, int);
+    Node** (*get_neighbors)(struct Lattice*, int*, int);
+    int (*get_1d_index)(struct Lattice*, int*);
+    int* (*get_nd_indices)(struct Lattice*, int);
+    void (*adapt_dimensions)(struct Lattice*, int*, int, double);
+    void (*update_flow_vectors)(struct Lattice*);
+};
+
+// MultiscaleLattice Structure
+struct MultiscaleLattice {
+    Lattice** lattices;
+    int num_lattices;
+    double* scale_factors;
+    
+    // Function pointers for multiscale operations
+    void (*initialize)(struct MultiscaleLattice*, int, int);
+    double* (*propagate)(struct MultiscaleLattice*, const double*, int, int);
+    void (*learn)(struct MultiscaleLattice*, const double*, int);
+    void (*adapt_dimensions)(struct MultiscaleLattice*, int*, int, double);
+    void (*update_flow_vectors)(struct MultiscaleLattice*);
+    void (*update_pheromone_markers)(struct MultiscaleLattice*);
+    void (*update_interactions)(struct MultiscaleLattice*);
+};
+
+// FluidLatticeAI Structure
+struct FluidLatticeAI {
+    MultiscaleLattice* multiscale_lattice;
+    double* input_signal;
+    int input_dimensions;
+    double performance_metric;
+    
+    // Adaptability parameters
+    double evaporation_threshold;
+    double condensation_threshold;
+    double sublimation_threshold;
+    double dissolution_threshold;
+    double crystallization_factor;
+    double melting_factor;
+    double freezing_threshold;
+    double learning_rate_decay;
+    
+    // Function pointers for FluidLatticeAI operations
+    void (*initialize)(struct FluidLatticeAI*, int, int);
+    double* (*process)(struct FluidLatticeAI*, const double*, int, int);
+    void (*learn)(struct FluidLatticeAI*, const double*, int);
+    void (*adapt_dimensions)(struct FluidLatticeAI*, const int*, int);
+    void (*update_flow_vectors)(struct FluidLatticeAI*);
+    double* (*generate_creative_output)(struct FluidLatticeAI*, const double*, int, int);
+    double (*calculate_error)(struct FluidLatticeAI*, const double*, int);
+    void (*evaporate)(struct FluidLatticeAI*);
+    void (*condense)(struct FluidLatticeAI*);
+    void (*sublimate)(struct FluidLatticeAI*);
+    void (*dissolve)(struct FluidLatticeAI*);
+    void (*crystallize)(struct FluidLatticeAI*);
+    void (*melt)(struct FluidLatticeAI*);
+    void (*freeze)(struct FluidLatticeAI*);
+    bool (*should_evaporate)(struct FluidLatticeAI*, double, double);
+    bool (*should_condense)(struct FluidLatticeAI*, double, double);
+    bool (*should_sublimate)(struct FluidLatticeAI*, double, double);
+    bool (*should_dissolve)(struct FluidLatticeAI*, double, double);
+    bool (*should_crystallize)(struct FluidLatticeAI*, double, double);
+    bool (*should_melt)(struct FluidLatticeAI*, double, double);
+    bool (*should_freeze)(struct FluidLatticeAI*, double);
+};
+
+// Knowledge Graph Structures
+typedef struct {
+    int source;
+    int target;
+    double weight;
+    char relation_type[MAX_STRING_LENGTH];
+} KnowledgeLink;
+
+struct KnowledgeGraph {
+    char** entity_names;
+    int num_entities;
+    int max_entities;
+    KnowledgeLink* links;
+    int num_links;
+    int max_links;
+};
+
+struct Concept {
+    int id;
+    char name[MAX_STRING_LENGTH];
+    char description[MAX_STRING_LENGTH];
+    double activation_level;
+    int* related_concepts;
+    int num_related_concepts;
+};
+
+struct Pattern {
+    PatternType type;
+    char name[MAX_STRING_LENGTH];
+    double* values;
+    int num_values;
+    double confidence;
+};
+
+struct Event {
+    int id;
+    char description[MAX_STRING_LENGTH];
+    double* features;
+    int num_features;
+    time_t timestamp;
+};
+
+struct Action {
+    int id;
+    char description[MAX_STRING_LENGTH];
+    double expected_utility;
+    double* parameters;
+    int num_parameters;
+};
+
+struct Goal {
+    int id;
+    char description[MAX_STRING_LENGTH];
+    double priority;
+    int* prerequisites;
+    int num_prerequisites;
+    int* conflicting_goals;
+    int num_conflicting;
+    double success_metric;
+};
+
+struct Constraint {
+    int id;
+    char description[MAX_STRING_LENGTH];
+    double severity;
+    bool is_hard_constraint;
+};
+
+struct Scenario {
+    int id;
+    char description[MAX_STRING_LENGTH];
+    Event* events;
+    int num_events;
+    Goal** goals;
+    int num_goals;
+    Constraint* constraints;
+    int num_constraints;
+};
+
+struct Experience {
+    int id;
+    time_t timestamp;
+    Event event;
+    Action* actions;
+    int num_actions;
+    double utility;
+    double* observations;
+    int num_observations;
+};
+
+// Learning Structures
+struct ReinforcementLearning {
+    double** q_values;
+    int num_states;
+    int num_actions;
+    double learning_rate;
+    double discount_factor;
+    double exploration_rate;
+};
+
+struct LearningStrategy {
+    int id;
+    char name[MAX_STRING_LENGTH];
+    double learning_rate;
+    double exploration_rate;
+    double (*select_action)(struct ReinforcementLearning*, int);
+    void (*update)(struct ReinforcementLearning*, int, int, int, double);
+};
+
+// Main AGI Structure
+struct AGI {
+    // Core subsystems
+    FluidLatticeAI* fluid_lattice_ai;
+    KnowledgeGraph* knowledge_graph;
+    ReinforcementLearning* reinforcement_learning;
+    
+    // Internal state metrics
+    Metric consciousness;
+    Metric spirit_level;
+    Metric flow_level;
+    
+    // Pattern storage
+    Pattern* patterns;
+    int num_patterns;
+    
+    // Goal management
+    Goal* goals;
+    int num_goals;
+    
+    // Experience memory
+    Experience* experiences;
+    int num_experiences;
+    
+    // Learning strategies
+    LearningStrategy* learning_strategies;
+    int num_learning_strategies;
+    
+    // Function pointers for AGI operations
+    void (*initialize)(struct AGI*);
+    void (*perceive_environment)(struct AGI*, double*, int);
+    void (*process_observations)(struct AGI*);
+    void (*monitor_internal_state)(struct AGI*);
+    void (*select_action)(struct AGI*, Action*);
+    void (*execute_action)(struct AGI*, Action*);
+    void (*learn_from_experience)(struct AGI*, Experience*);
+    void (*update_knowledge_graph)(struct AGI*, Experience*);
+    void (*generate_creative_idea)(struct AGI*, char*, int);
+    double (*calculate_consciousness)(struct AGI*);
+    double (*calculate_spirit_level)(struct AGI*);
+    double (*calculate_flow_level)(struct AGI*);
+};
+
+/* ===============================
+ * Function Prototypes
+ * =============================== */
+
+// Initialization functions
+void init_agi(AGI* agi);
+FluidLatticeAI* create_fluid_lattice_ai(int* dimensions, int num_dimensions, int flow_vector_dimensions, 
+                                      int num_fractional_dimensions, int num_pheromone_markers, int num_scales);
+KnowledgeGraph* create_knowledge_graph(int max_entities, int max_links);
+ReinforcementLearning* create_reinforcement_learning(int num_states, int num_actions);
+
+// Node operations
+void node_initialize(Node* node, int state_dimensions, int num_layers);
+void node_process(Node* node, const double* input_signal, int input_size, Node** neighbors, int num_neighbors);
+void node_activate(Node* node);
+void node_learn(Node* node, const double* error_signal, int error_size);
+double* node_get_state(const Node* node);
+int node_get_state_dim(const Node* node);
+double node_get_learning_rate(const Node* node);
+void node_set_learning_rate(Node* node, double value);
+
+// Lattice operations
+double* lattice_propagate(Lattice* lattice, const double* input_signal, int input_size, int radius);
+void lattice_learn(Lattice* lattice, const double* target_signal, int target_size);
+Node** lattice_get_neighbors(Lattice* lattice, int* indices, int radius);
+int lattice_get_1d_index(Lattice* lattice, int* indices);
+int* lattice_get_nd_indices(Lattice* lattice, int index);
+void lattice_adapt_dimensions(Lattice* lattice, int* new_dimensions, int num_dimensions, double performance_metric);
+void lattice_update_flow_vectors(Lattice* lattice);
+
+// MultiscaleLattice operations
+void multiscale_lattice_initialize(MultiscaleLattice* ml, int state_dimensions, int num_layers);
+double* multiscale_lattice_propagate(MultiscaleLattice* ml, const double* input_signal, int input_size, int radius);
+void multiscale_lattice_learn(MultiscaleLattice* ml, const double* target_signal, int target_size);
+void multiscale_lattice_adapt_dimensions(MultiscaleLattice* ml, int* new_dimensions, int num_dimensions, double performance_metric);
+void multiscale_lattice_update_flow_vectors(MultiscaleLattice* ml);
+void multiscale_lattice_update_pheromone_markers(MultiscaleLattice* ml);
+void multiscale_lattice_update_interactions(MultiscaleLattice* ml);
+
+// FluidLatticeAI operations
+void fluid_lattice_ai_initialize(FluidLatticeAI* flai, int state_dimensions, int num_layers);
+double* fluid_lattice_ai_process(FluidLatticeAI* flai, const double* input_signal, int input_size, int radius);
+void fluid_lattice_ai_learn(FluidLatticeAI* flai, const double* target_signal, int target_size);
+void fluid_lattice_ai_adapt_dimensions(FluidLatticeAI* flai, const int* new_dimensions, int num_dimensions);
+void fluid_lattice_ai_update_flow_vectors(FluidLatticeAI* flai);
+double* fluid_lattice_ai_generate_creative_output(FluidLatticeAI* flai, const double* input_signal, int input_size, int num_iterations);
+double fluid_lattice_ai_calculate_error(FluidLatticeAI* flai, const double* target_signal, int target_size);
+void fluid_lattice_ai_evaporate(FluidLatticeAI* flai);
+void fluid_lattice_ai_condense(FluidLatticeAI* flai);
+void fluid_lattice_ai_sublimate(FluidLatticeAI* flai);
+void fluid_lattice_ai_dissolve(FluidLatticeAI* flai);
+void fluid_lattice_ai_crystallize(FluidLatticeAI* flai);
+void fluid_lattice_ai_melt(FluidLatticeAI* flai);
+void fluid_lattice_ai_freeze(FluidLatticeAI* flai);
+bool fluid_lattice_ai_should_evaporate(FluidLatticeAI* flai, double previous_error, double current_error);
+bool fluid_lattice_ai_should_condense(FluidLatticeAI* flai, double previous_error, double current_error);
+bool fluid_lattice_ai_should_sublimate(FluidLatticeAI* flai, double previous_error, double current_error);
+bool fluid_lattice_ai_should_dissolve(FluidLatticeAI* flai, double previous_error, double current_error);
+bool fluid_lattice_ai_should_crystallize(FluidLatticeAI* flai, double previous_error, double current_error);
+bool fluid_lattice_ai_should_melt(FluidLatticeAI* flai, double previous_error, double current_error);
+bool fluid_lattice_ai_should_freeze(FluidLatticeAI* flai, double current_error);
+
+// KnowledgeGraph operations
+void knowledge_graph_add_entity(KnowledgeGraph* kg, const char* entity_name);
+void knowledge_graph_add_link(KnowledgeGraph* kg, int source, int target, double weight, const char* relation_type);
+int knowledge_graph_find_entity(KnowledgeGraph* kg, const char* entity_name);
+void knowledge_graph_update_link_weight(KnowledgeGraph* kg, int source, int target, double weight_delta);
+
+// ReinforcementLearning operations
+double reinforcement_learning_select_action_epsilon_greedy(ReinforcementLearning* rl, int state);
+void reinforcement_learning_update_q_values(ReinforcementLearning* rl, int state, int action, int next_state, double reward);
+
+// AGI operations
+void agi_initialize(AGI* agi);
+void agi_perceive_environment(AGI* agi, double* sensor_data, int sensor_data_size);
+void agi_process_observations(AGI* agi);
+void agi_monitor_internal_state(AGI* agi);
+void agi_select_action(AGI* agi, Action* action);
+void agi_execute_action(AGI* agi, Action* action);
+void agi_learn_from_experience(AGI* agi, Experience* experience);
+void agi_update_knowledge_graph(AGI* agi, Experience* experience);
+void agi_generate_creative_idea(AGI* agi, char* output, int output_size);
+double agi_calculate_consciousness(AGI* agi);
+double agi_calculate_spirit_level(AGI* agi);
+double agi_calculate_flow_level(AGI* agi);
+
+// Utility functions
+double* create_double_array(int size);
+int* create_int_array(int size);
+void free_double_array(double* array);
+void free_int_array(int* array);
+double vector_dot_product(const double* v1, const double* v2, int size);
+double vector_magnitude(const double* v, int size);
+void vector_add(const double* v1, const double* v2, double* result, int size);
+void vector_subtract(const double* v1, const double* v2, double* result, int size);
+void vector_multiply_scalar(const double* v, double scalar, double* result, int size);
+void vector_element_multiply(const double* v1, const double* v2, double* result, int size);
+void vector_normalize(double* v, int size);
+double random_uniform();
+double random_normal();
+NestedDimension* create_nested_dimension(double value);
+void free_nested_dimension(NestedDimension* nd);
+double calculate_fractal_dimension(const double* data, int size);
+double* generate_fbm(int dimensions, int samples, double hurst);
+void free_fbm(double** fbm, int dimensions);
+
+/* ===============================
+ * Function Implementations
+ * =============================== */
+
+// Utility functions implementation
+
+double* create_double_array(int size) {
+    double* array = (double*)malloc(size * sizeof(double));
+    if (!array) {
+        fprintf(stderr, "Failed to allocate memory for double array of size %d\n", size);
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < size; i++) {
+        array[i] = 0.0;
+    }
+    return array;
+}
+
+int* create_int_array(int size) {
+    int* array = (int*)malloc(size * sizeof(int));
+    if (!array) {
+        fprintf(stderr, "Failed to allocate memory for int array of size %d\n", size);
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < size; i++) {
+        array[i] = 0;
+    }
+    return array;
+}
+
+void free_double_array(double* array) {
+    if (array) {
+        free(array);
+    }
+}
+
+void free_int_array(int* array) {
+    if (array) {
+        free(array);
+    }
+}
+
+double vector_dot_product(const double* v1, const double* v2, int size) {
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum += v1[i] * v2[i];
+    }
+    return sum;
+}
+
+double vector_magnitude(const double* v, int size) {
+    double sum_squares = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum_squares += v[i] * v[i];
+    }
+    return sqrt(sum_squares);
+}
+
+void vector_add(const double* v1, const double* v2, double* result, int size) {
+    for (int i = 0; i < size; i++) {
+        result[i] = v1[i] + v2[i];
+    }
+}
+
+void vector_subtract(const double* v1, const double* v2, double* result, int size) {
+    for (int i = 0; i < size; i++) {
+        result[i] = v1[i] - v2[i];
+    }
+}
+
+void vector_multiply_scalar(const double* v, double scalar, double* result, int size) {
+    for (int i = 0; i < size; i++) {
+        result[i] = v[i] * scalar;
+    }
+}
+
+void vector_element_multiply(const double* v1, const double* v2, double* result, int size) {
+    for (int i = 0; i < size; i++) {
+        result[i] = v1[i] * v2[i];
+    }
+}
+
+void vector_normalize(double* v, int size) {
+    double mag = vector_magnitude(v, size);
+    if (mag > 1e-10) {  // Avoid division by zero
+        for (int i = 0; i < size; i++) {
+            v[i] /= mag;
+        }
+    }
+}
+
+double random_uniform() {
+    return (double)rand() / RAND_MAX;
+}
+
+double random_normal() {
+    // Box-Muller transform for normal distribution
+    double u1 = random_uniform();
+    double u2 = random_uniform();
+    
+    // Ensure u1 is not exactly 0
+    if (u1 < 1e-10) u1 = 1e-10;
+    
+    double z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+    return z0;
+}
+
+NestedDimension* create_nested_dimension(double value) {
+    NestedDimension* nd = (NestedDimension*)malloc(sizeof(NestedDimension));
+    if (!nd) {
+        fprintf(stderr, "Failed to allocate memory for NestedDimension\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    nd->value = value;
+    nd->children = NULL;
+    nd->num_children = 0;
+    nd->max_children = 0;
+    
+    return nd;
+}
+
+void free_nested_dimension(NestedDimension* nd) {
+    if (!nd) return;
+    
+    if (nd->children) {
+        for (int i = 0; i < nd->num_children; i++) {
+            free_nested_dimension(nd->children[i]);
+        }
+        free(nd->children);
+    }
+    
+    free(nd);
+}
+
+double calculate_fractal_dimension(const double* data, int size) {
+    // Simplified box-counting method for fractal dimension calculation
+    if (size < 2) return 1.0;
+    
+    int num_boxes = size / 2;
+    double* coarse_data = create_double_array(num_boxes);
+    
+    // Coarsen the data by taking averages
+    for (int i = 0; i < num_boxes; i++) {
+        coarse_data[i] = (data[i*2] + data[i*2+1]) / 2.0;
+    }
+    
+    // Calculate variance at both scales
+    double fine_sum = 0.0, fine_sum_sq = 0.0;
+    double coarse_sum = 0.0, coarse_sum_sq = 0.0;
+    
+    for (int i = 0; i < size; i++) {
+        fine_sum += data[i];
+        fine_sum_sq += data[i] * data[i];
+    }
+    
+    for (int i = 0; i < num_boxes; i++) {
+        coarse_sum += coarse_data[i];
+        coarse_sum_sq += coarse_data[i] * coarse_data[i];
+    }
+    
+    double fine_var = fine_sum_sq/size - (fine_sum/size)*(fine_sum/size);
+    double coarse_var = coarse_sum_sq/num_boxes - (coarse_sum/num_boxes)*(coarse_sum/num_boxes);
+    
+    // Calculate Hurst exponent based on variance scaling
+    double H = 0.5;
+    if (fine_var > 1e-10 && coarse_var > 1e-10) {
+        H = 0.5 * (1.0 + log(coarse_var/fine_var) / log(2.0));
+    }
+    
+    free_double_array(coarse_data);
+    
+    // Fractal dimension D = 2 - H for a time series
+    return 2.0 - H;
+}
+
+double* generate_fbm(int dimensions, int samples, double hurst) {
+    double* fbm = create_double_array(dimensions * samples);
+    
+    // Generate independent Gaussian random variables
+    for (int i = 0; i < dimensions * samples; i++) {
+        fbm[i] = random_normal();
+    }
+    
+    // Convert to fractional Brownian motion
+    for (int d = 0; d < dimensions; d++) {
+        for (int i = 1; i < samples; i++) {
+            double scale = pow(i, hurst - 0.5);
+            fbm[d*samples + i] = fbm[d*samples + i-1] + scale * fbm[d*samples + i];
+        }
+    }
+    
+    return fbm;
+}
+
+void free_fbm(double** fbm, int dimensions) {
+    if (!fbm) return;
+    
+    for (int i = 0; i < dimensions; i++) {
+        if (fbm[i]) {
+            free(fbm[i]);
+        }
+    }
+    
+    free(fbm);
+}
+
+// Node implementation
+
+Node* create_node(NodeType type, int flow_vector_dimensions, int num_fractional_dimensions, 
+                int num_pheromone_markers, int state_dimensions) {
+    Node* node = (Node*)malloc(sizeof(Node));
+    if (!node) {
+        fprintf(stderr, "Failed to allocate memory for Node\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    node->type = type;
+    node->flow_vector_dimensions = flow_vector_dimensions;
+    node->flow_vector = create_double_array(flow_vector_dimensions);
+    node->adaptability = DEFAULT_ADAPTABILITY;
+    node->randomness_factor = 0.01;
+    node->state_dimensions = state_dimensions;
+    node->state = create_double_array(state_dimensions);
+    node->memory = create_double_array(state_dimensions);
+    node->context_strength = 0.5;
+    node->attention_factor = 1.0;
+    node->decay_rate = 0.01;
+    node->inhibition_factor = 0.1;
+    node->learning_rate = INITIAL_LEARNING_RATE;
+    node->regularization_term = 0.001;
+    node->num_fractional_dimensions = num_fractional_dimensions;
+    node->fractional_dimensions = (FractionalDimension*)malloc(num_fractional_dimensions * sizeof(FractionalDimension));
+    
+    if (!node->fractional_dimensions) {
+        fprintf(stderr, "Failed to allocate memory for fractional dimensions\n");
+        free_double_array(node->flow_vector);
+        free_double_array(node->state);
+        free_double_array(node->memory);
+        free(node);
+        exit(EXIT_FAILURE);
+    }
+    
+    for (int i = 0; i < num_fractional_dimensions; i++) {
+        node->fractional_dimensions[i].whole = floor(random_uniform() * 10);
+        node->fractional_dimensions[i].fractional = random_uniform();
+    }
+    
+    node->nested_dimension = create_nested_dimension(0.01);
+    
+    node->num_pheromone_markers = num_pheromone_markers;
+    node->pheromone_markers = create_double_array(num_pheromone_markers);
+    node->specialization_factor = 0.5;
+    node->total_dynamism = 1.0;
+    
+    // Initialize flow vector with random normalized values
+    for (int i = 0; i < flow_vector_dimensions; i++) {
+        node->flow_vector[i] = random_normal();
+    }
+    vector_normalize(node->flow_vector, flow_vector_dimensions);
+    
+    // Set function pointers
+    node->initialize = node_initialize;
+    node->process = node_process;
+    node->activate = node_activate;
+    node->learn = node_learn;
+    node->get_state = node_get_state;
+    node->get_state_dim = node_get_state_dim;
+    node->get_learning_rate = node_get_learning_rate;
+    node->set_learning_rate = node_set_learning_rate;
+    
+    return node;
+}
+
+void free_node(Node* node) {
+    if (!node) return;
+    
+    free_double_array(node->flow_vector);
+    free_double_array(node->state);
+    free_double_array(node->memory);
+    
+    if (node->fractional_dimensions) {
+        free(node->fractional_dimensions);
+    }
+    
+    free_nested_dimension(node->nested_dimension);
+    free_double_array(node->pheromone_markers);
+    
+    free(node);
+}
+
+void node_initialize(Node* node, int state_dimensions, int num_layers) {
+    if (state_dimensions <= 0) {
+        fprintf(stderr, "Invalid state dimensions: %d\n", state_dimensions);
+        return;
+    }
+    
+    // Resize state and memory if needed
+    if (node->state_dimensions != state_dimensions) {
+        free_double_array(node->state);
+        free_double_array(node->memory);
+        
+        node->state_dimensions = state_dimensions;
+        node->state = create_double_array(state_dimensions);
+        node->memory = create_double_array(state_dimensions);
+    }
+    
+    // Initialize state with random values
+    for (int i = 0; i < state_dimensions; i++) {
+        node->state[i] = random_normal() * 0.1;
+    }
+    
+    // Create nested dimensions if needed
+    int num_nested_dimensions = (int)(random_uniform() * 5);
+    for (int i = 0; i < num_nested_dimensions; i++) {
+        if (node->nested_dimension->num_children >= node->nested_dimension->max_children) {
+            int new_max = node->nested_dimension->max_children == 0 ? 8 : node->nested_dimension->max_children * 2;
+            NestedDimension** new_children = (NestedDimension**)realloc(
+                node->nested_dimension->children, 
+                new_max * sizeof(NestedDimension*)
+            );
+            
+            if (!new_children) {
+                fprintf(stderr, "Failed to allocate memory for nested dimension children\n");
+                return;
+            }
+            
+            node->nested_dimension->children = new_children;
+            node->nested_dimension->max_children = new_max;
+        }
+        
+        node->nested_dimension->children[node->nested_dimension->num_children] = create_nested_dimension(random_uniform());
+        node->nested_dimension->num_children++;
+    }
+}
+
+void node_process(Node* node, const double* input_signal, int input_size, Node** neighbors, int num_neighbors) {
+    if (!node || !input_signal || input_size <= 0) return;
+    
+    // Calculate environmental signal (average of neighbor states)
+    double* environmental_signal = create_double_array(node->state_dimensions);
+    double* contextual_signal = create_double_array(node->state_dimensions);
+    double* attention_signal = create_double_array(node->state_dimensions);
+    double* inhibition_signal = create_double_array(node->state_dimensions);
+    
+    // Environmental signal from neighbors
+    if (num_neighbors > 0) {
+        for (int n = 0; n < num_neighbors; n++) {
+            for (int i = 0; i < node->state_dimensions; i++) {
+                environmental_signal[i] += neighbors[n]->state[i] / num_neighbors;
+            }
+        }
+    }
+    
+    // Contextual signal (simplified for demonstration)
+    for (int i = 0; i < node->state_dimensions; i++) {
+        contextual_signal[i] = node->context_strength * environmental_signal[i];
+    }
+    
+    // Attention signal (set to 1.0 initially)
+    for (int i = 0; i < node->state_dimensions; i++) {
+        attention_signal[i] = 1.0;
+    }
+    
+    // Calculate attentional focus based on similarity to neighbors
+    if (num_neighbors > 0) {
+        double max_similarity = 0.0;
+        for (int n = 0; n < num_neighbors; n++) {
+            double dot_product = vector_dot_product(node->state, neighbors[n]->state, node->state_dimensions);
+            double state_norm = vector_magnitude(node->state, node->state_dimensions);
+            double neighbor_norm = vector_magnitude(neighbors[n]->state, node->state_dimensions);
+            
+            if (state_norm > 1e-10 && neighbor_norm > 1e-10) {
+                double similarity = dot_product / (state_norm * neighbor_norm);
+                max_similarity = similarity > max_similarity ? similarity : max_similarity;
+            }
+        }
+        
+        for (int i = 0; i < node->state_dimensions; i++) {
+            attention_signal[i] *= (1.0 + node->attention_factor * max_similarity);
+        }
+    }
+    
+    // Inhibition signal from negatively correlated neighbors
+    if (num_neighbors > 0) {
+        for (int n = 0; n < num_neighbors; n++) {
+            double dot_product = vector_dot_product(node->state, neighbors[n]->state, node->state_dimensions);
+            if (dot_product < 0) {
+                for (int i = 0; i < node->state_dimensions; i++) {
+                    inhibition_signal[i] += neighbors[n]->state[i];
+                }
+            }
+        }
+    }
+    
+    // Process the input signal
+    double input_dot_flow = 0.0;
+    int min_dim = input_size < node->flow_vector_dimensions ? input_size : node->flow_vector_dimensions;
+    for (int i = 0; i < min_dim; i++) {
+        input_dot_flow += input_signal[i] * node->flow_vector[i];
+    }
+    
+    // Update state based on input and signals
+    for (int i = 0; i < node->state_dimensions; i++) {
+        // Input contribution
+        double input_contrib = 0.0;
+        if (i < input_size) {
+            input_contrib = input_signal[i] * input_dot_flow;
+        }
+        
+        // Update state
+        node->state[i] += node->adaptability * (input_contrib - node->state[i]);
+        node->state[i] += node->adaptability * environmental_signal[i];
+        node->state[i] += contextual_signal[i];
+        node->state[i] *= attention_signal[i];
+        node->state[i] -= node->inhibition_factor * inhibition_signal[i];
+        
+        // Apply fractional dimension effect
+        if (i < node->num_fractional_dimensions) {
+            node->state[i] *= pow(node->fractional_dimensions[i].fractional, 0.1);
+        }
+    }
+    
+    // Introduce randomness (FBM-like noise)
+    for (int i = 0; i < node->state_dimensions; i++) {
+        node->state[i] += node->randomness_factor * random_normal();
+    }
+    
+    // Update memory
+    for (int i = 0; i < node->state_dimensions; i++) {
+        node->memory[i] = 0.9 * node->memory[i] + 0.1 * node->state[i];
+    }
+    
+    // Apply decay
+    for (int i = 0; i < node->state_dimensions; i++) {
+        node->state[i] *= (1.0 - node->decay_rate);
+    }
+    
+    // Free temporary arrays
+    free_double_array(environmental_signal);
+    free_double_array(contextual_signal);
+    free_double_array(attention_signal);
+    free_double_array(inhibition_signal);
+}
+
+void node_activate(Node* node) {
+    if (!node) return;
+    
+    // Apply activation function based on node type
+    switch (node->type) {
+        case NODE_STANDARD:
+            // ReLU activation
+            for (int i = 0; i < node->state_dimensions; i++) {
+                node->state[i] = node->state[i] > 0.0 ? node->state[i] : 0.0;
+            }
+            break;
+            
+        case NODE_HYBRID:
+            // Custom activation: ReLU * sqrt(abs(x))
+            for (int i = 0; i < node->state_dimensions; i++) {
+                if (node->state[i] > 0.0) {
+                    node->state[i] *= sqrt(fabs(node->state[i]));
+                } else {
+                    node->state[i] = 0.0;
+                }
+            }
+            break;
+            
+        case NODE_NONLINEAR:
+            // tanh activation
+            for (int i = 0; i < node->state_dimensions; i++) {
+                node->state[i] = tanh(node->state[i]);
+            }
+            break;
+    }
+}
+
+void node_learn(Node* node, const double* error_signal, int error_size) {
+    if (!node || !error_signal || error_size <= 0) return;
+    
+    // Calculate gradient (simplified backpropagation)
+    double* gradient = create_double_array(node->state_dimensions);
+    
+    int min_dim = error_size < node->state_dimensions ? error_size : node->state_dimensions;
+    for (int i = 0; i < min_dim; i++) {
+        double gradient_value = 0.0;
+        
+        // Gradient depends on activation function
+        switch (node->type) {
+            case NODE_STANDARD:
+                // ReLU derivative: 1 if x > 0, 0 otherwise
+                gradient_value = node->state[i] > 0.0 ? 1.0 : 0.0;
+                break;
+                
+            case NODE_HYBRID:
+                // Custom activation derivative
+                if (node->state[i] > 0.0) {
+                    gradient_value = 1.5 * sqrt(fabs(node->state[i]));
+                } else {
+                    gradient_value = 0.0;
+                }
+                break;
+                
+            case NODE_NONLINEAR:
+                // tanh derivative: 1 - tanh^2(x)
+                gradient_value = 1.0 - node->state[i] * node->state[i];
+                break;
+        }
+        
+        gradient[i] = error_signal[i] * gradient_value;
+    }
+    
+    // Update state using gradient descent with regularization
+    for (int i = 0; i < node->state_dimensions; i++) {
+        // Generate FBM-like noise for adaptive learning
+        double fbm_noise = 0.001 * random_normal();
+        node->state[i] += node->learning_rate * (gradient[i] - node->regularization_term * node->state[i]) + fbm_noise;
+    }
+    
+    free_double_array(gradient);
+}
+
+double* node_get_state(const Node* node) {
+    return node ? node->state : NULL;
+}
+
+int node_get_state_dim(const Node* node) {
+    return node ? node->state_dimensions : 0;
+}
+
+double node_get_learning_rate(const Node* node) {
+    return node ? node->learning_rate : 0.0;
+}
+
+void node_set_learning_rate(Node* node, double value) {
+    if (node) {
+        node->learning_rate = value;
+    }
+}
+
+// Lattice implementation
+
+Lattice* create_lattice(int* dimensions, int num_dimensions, int flow_vector_dimensions, 
+                      int num_fractional_dimensions, int num_pheromone_markers, double global_learning_rate) {
+    if (!dimensions || num_dimensions <= 0) {
+        fprintf(stderr, "Invalid dimensions for lattice\n");
+        return NULL;
+    }
+    
+    Lattice* lattice = (Lattice*)malloc(sizeof(Lattice));
+    if (!lattice) {
+        fprintf(stderr, "Failed to allocate memory for Lattice\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    lattice->dimensions = (int*)malloc(num_dimensions * sizeof(int));
+    if (!lattice->dimensions) {
+        fprintf(stderr, "Failed to allocate memory for lattice dimensions\n");
+        free(lattice);
+        exit(EXIT_FAILURE);
+    }
+    
+    memcpy(lattice->dimensions, dimensions, num_dimensions * sizeof(int));
+    lattice->num_dimensions = num_dimensions;
+    
+    // Calculate total number of nodes
+    lattice->total_nodes = 1;
+    for (int i = 0; i < num_dimensions; i++) {
+        lattice->total_nodes *= dimensions[i];
+    }
+    
+    // Allocate and initialize nodes
+    lattice->nodes = (Node**)malloc(lattice->total_nodes * sizeof(Node*));
+    if (!lattice->nodes) {
+        fprintf(stderr, "Failed to allocate memory for lattice nodes\n");
+        free(lattice->dimensions);
+        free(lattice);
+        exit(EXIT_FAILURE);
+    }
+    
+    for (int i = 0; i < lattice->total_nodes; i++) {
+        NodeType type = (NodeType)(i % 3);  // Distribute node types
+        lattice->nodes[i] = create_node(type, flow_vector_dimensions, 
+                                       num_fractional_dimensions, num_pheromone_markers, dimensions[0]);
+    }
+    
+    lattice->global_learning_rate = global_learning_rate;
+    
+    // Set function pointers
+    lattice->propagate = lattice_propagate;
+    lattice->learn = lattice_learn;
+    lattice->get_neighbors = lattice_get_neighbors;
+    lattice->get_1d_index = lattice_get_1d_index;
+    lattice->get_nd_indices = lattice_get_nd_indices;
+    lattice->adapt_dimensions = lattice_adapt_dimensions;
+    lattice->update_flow_vectors = lattice_update_flow_vectors;
+    
+    return lattice;
+}
+
+void free_lattice(Lattice* lattice) {
+    if (!lattice) return;
+    
+    if (lattice->nodes) {
+        for (int i = 0; i < lattice->total_nodes; i++) {
+            free_node(lattice->nodes[i]);
+        }
+        free(lattice->nodes);
+    }
+    
+    free(lattice->dimensions);
+    free(lattice);
+}
+
+double* lattice_propagate(Lattice* lattice, const double* input_signal, int input_size, int radius) {
+    if (!lattice || !input_signal || input_size <= 0) return NULL;
+    
+    // Find the node to activate based on input signal
+    int* indices = (int*)malloc(lattice->num_dimensions * sizeof(int));
+    if (!indices) {
+        fprintf(stderr, "Failed to allocate memory for lattice indices\n");
+        return NULL;
+    }
+    
+    // Map input signal to lattice indices
+    for (int i = 0; i < lattice->num_dimensions && i < input_size; i++) {
+        double normalized_input = input_signal[i];
+        if (normalized_input < 0.0) normalized_input = 0.0;
+        if (normalized_input >= 1.0) normalized_input = 0.999;
+        
+        indices[i] = (int)(normalized_input * lattice->dimensions[i]);
+    }
+    
+    // Fill in any remaining dimensions
+    for (int i = input_size; i < lattice->num_dimensions; i++) {
+        indices[i] = 0;
+    }
+    
+    // Get 1D index from ND indices
+    int index = lattice->get_1d_index(lattice, indices);
+    
+    // Get neighbors
+    Node** neighbors = lattice->get_neighbors(lattice, indices, radius);
+    int num_neighbors = 0;
+    if (neighbors) {
+        // Count neighbors (until null)
+        while (neighbors[num_neighbors] != NULL) {
+            num_neighbors++;
+        }
+    }
+    
+    // Process the node
+    lattice->nodes[index]->process(lattice->nodes[index], input_signal, input_size, neighbors, num_neighbors);
+    lattice->nodes[index]->activate(lattice->nodes[index]);
+    
+    // Free temporary arrays
+    free(indices);
+    free(neighbors);
+    
+    // Return the node's state
+    return lattice->nodes[index]->get_state(lattice->nodes[index]);
+}
+
+void lattice_learn(Lattice* lattice, const double* target_signal, int target_size) {
+    if (!lattice || !target_signal || target_size <= 0) return;
+    
+    // Simple backpropagation from the last node backward
+    double* error_signal = create_double_array(target_size);
+    
+    // Last node's error is the difference between its output and the target
+    int last_node_index = lattice->total_nodes - 1;
+    Node* last_node = lattice->nodes[last_node_index];
+    double* last_node_state = last_node->get_state(last_node);
+    int state_dim = last_node->get_state_dim(last_node);
+    
+    int min_dim = state_dim < target_size ? state_dim : target_size;
+    for (int i = 0; i < min_dim; i++) {
+        error_signal[i] = target_signal[i] - last_node_state[i];
+    }
+    
+    // Learn from the last node backward
+    for (int i = lattice->total_nodes - 1; i >= 0; i--) {
+        lattice->nodes[i]->learn(lattice->nodes[i], error_signal, min_dim);
+        
+        // Propagate error to previous nodes (simplified)
+        // In a real system, this would involve proper backpropagation through connections
+        if (i > 0) {
+            for (int j = 0; j < min_dim; j++) {
+                error_signal[j] *= 0.9;  // Simple decay of error
+            }
+        }
+    }
+    
+    free_double_array(error_signal);
+}
+
+Node** lattice_get_neighbors(Lattice* lattice, int* indices, int radius) {
+    if (!lattice || !indices) return NULL;
+    
+    // Maximum possible number of neighbors
+    int max_neighbors = 1;
+    for (int i = 0; i < lattice->num_dimensions; i++) {
+        max_neighbors *= (2 * radius + 1);
+    }
+    max_neighbors -= 1;  // Exclude the center node itself
+    
+    // Allocate array for neighbors (add one for NULL terminator)
+    Node** neighbors = (Node**)malloc((max_neighbors + 1) * sizeof(Node*));
+    if (!neighbors) {
+        fprintf(stderr, "Failed to allocate memory for lattice neighbors\n");
+        return NULL;
+    }
+    
+    int neighbor_count = 0;
+    
+    // Temporary array for neighbor indices
+    int* neighbor_indices = (int*)malloc(lattice->num_dimensions * sizeof(int));
+    if (!neighbor_indices) {
+        fprintf(stderr, "Failed to allocate memory for neighbor indices\n");
+        free(neighbors);
+        return NULL;
+    }
+    
+    // Recursive function to find all neighbors
+    void find_neighbors(int dim, int* curr_indices) {
+        if (dim == lattice->num_dimensions) {
+            // Check if this is the center node
+            bool is_center = true;
+            for (int i = 0; i < lattice->num_dimensions; i++) {
+                if (curr_indices[i] != indices[i]) {
+                    is_center = false;
+                    break;
+                }
+            }
+            
+            if (!is_center) {
+                int neighbor_index = lattice->get_1d_index(lattice, curr_indices);
+                if (neighbor_index >= 0 && neighbor_index < lattice->total_nodes) {
+                    neighbors[neighbor_count++] = lattice->nodes[neighbor_index];
+                }
+            }
+            return;
+        }
+        
+        // Try all possible values for this dimension
+        for (int offset = -radius; offset <= radius; offset++) {
+            int value = indices[dim] + offset;
+            
+            // Handle wrapping (toroidal lattice)
+            while (value < 0) value += lattice->dimensions[dim];
+            while (value >= lattice->dimensions[dim]) value -= lattice->dimensions[dim];
+            
+            curr_indices[dim] = value;
+            find_neighbors(dim + 1, curr_indices);
+        }
+    }
+    
+    // Start recursion to find all neighbors
+    memcpy(neighbor_indices, indices, lattice->num_dimensions * sizeof(int));
+    find_neighbors(0, neighbor_indices);
+    
+    // Add NULL terminator
+    neighbors[neighbor_count] = NULL;
+    
+    free(neighbor_indices);
+    return neighbors;
+}
+
+int lattice_get_1d_index(Lattice* lattice, int* indices) {
+    if (!lattice || !indices) return -1;
+    
+    int index = 0;
+    int multiplier = 1;
+    
+    for (int i = 0; i < lattice->num_dimensions; i++) {
+        if (indices[i] < 0 || indices[i] >= lattice->dimensions[i]) {
+            return -1; // Invalid index
+        }
+        index += indices[i] * multiplier;
+        multiplier *= lattice->dimensions[i];
+    }
+    
+    return index;
+}
+
+int* lattice_get_nd_indices(Lattice* lattice, int index) {
+    if (!lattice || index < 0 || index >= lattice->total_nodes) return NULL;
+    
+    int* indices = (int*)malloc(lattice->num_dimensions * sizeof(int));
+    if (!indices) {
+        fprintf(stderr, "Failed to allocate memory for ND indices\n");
+        return NULL;
+    }
+    
+    int remaining = index;
+    for (int i = 0; i < lattice->num_dimensions; i++) {
+        indices[i] = remaining % lattice->dimensions[i];
+        remaining /= lattice->dimensions[i];
+    }
+    
+    return indices;
+}
+
+void lattice_adapt_dimensions(Lattice* lattice, int* new_dimensions, int num_dimensions, double performance_metric) {
+    if (!lattice || !new_dimensions || num_dimensions <= 0 || num_dimensions != lattice->num_dimensions) {
+        fprintf(stderr, "Invalid dimensions for lattice adaptation\n");
+        return;
+    }
+    
+    // Calculate new total nodes
+    int new_total_nodes = 1;
+    for (int i = 0; i < num_dimensions; i++) {
+        new_total_nodes *= new_dimensions[i];
+    }
+    
+    // Allocate new nodes array
+    Node** new_nodes = (Node**)malloc(new_total_nodes * sizeof(Node*));
+    if (!new_nodes) {
+        fprintf(stderr, "Failed to allocate memory for new lattice nodes\n");
+        return;
+    }
+    
+    // Keep common nodes, create new ones
+    for (int i = 0; i < new_total_nodes; i++) {
+        if (i < lattice->total_nodes) {
+            new_nodes[i] = lattice->nodes[i];
+        } else {
+            // Create new node with same properties as first node but different type
+            NodeType type = (NodeType)(i % 3);
+            new_nodes[i] = create_node(type, lattice->nodes[0]->flow_vector_dimensions,
+                                      lattice->nodes[0]->num_fractional_dimensions,
+                                      lattice->nodes[0]->num_pheromone_markers,
+                                      new_dimensions[0]);
+            
+            // Initialize with scaled adaptability based on performance
+            new_nodes[i]->adaptability = DEFAULT_ADAPTABILITY * (1.0 + 0.1 * performance_metric);
+        }
+    }
+    
+    // Free any excess nodes from old array
+    for (int i = new_total_nodes; i < lattice->total_nodes; i++) {
+        free_node(lattice->nodes[i]);
+    }
+    
+    // Update lattice with new dimensions and nodes
+    free(lattice->nodes);
+    lattice->nodes = new_nodes;
+    
+    free(lattice->dimensions);
+    lattice->dimensions = (int*)malloc(num_dimensions * sizeof(int));
+    if (!lattice->dimensions) {
+        fprintf(stderr, "Failed to allocate memory for new lattice dimensions\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    memcpy(lattice->dimensions, new_dimensions, num_dimensions * sizeof(int));
+    lattice->num_dimensions = num_dimensions;
+    lattice->total_nodes = new_total_nodes;
+}
+
+void lattice_update_flow_vectors(Lattice* lattice) {
+    if (!lattice) return;
+    
+    for (int i = 0; i < lattice->total_nodes; i++) {
+        Node* node = lattice->nodes[i];
+        
+        // Generate new random normalized flow vector
+        for (int j = 0; j < node->flow_vector_dimensions; j++) {
+            node->flow_vector[j] = random_normal();
+        }
+        
+        vector_normalize(node->flow_vector, node->flow_vector_dimensions);
+    }
+}
+
+// MultiscaleLattice implementation
+
+MultiscaleLattice* create_multiscale_lattice(int* base_dimensions, int num_dimensions, int flow_vector_dimensions,
+                                           int num_fractional_dimensions, int num_pheromone_markers, int num_scales,
+                                           double global_learning_rate) {
+    if (!base_dimensions || num_dimensions <= 0 || num_scales <= 0) {
+        fprintf(stderr, "Invalid parameters for multiscale lattice\n");
+        return NULL;
+    }
+    
+    MultiscaleLattice* ml = (MultiscaleLattice*)malloc(sizeof(MultiscaleLattice));
+    if (!ml) {
+        fprintf(stderr, "Failed to allocate memory for MultiscaleLattice\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    ml->num_lattices = num_scales;
+    ml->lattices = (Lattice**)malloc(num_scales * sizeof(Lattice*));
+    if (!ml->lattices) {
+        fprintf(stderr, "Failed to allocate memory for multiscale lattices\n");
+        free(ml);
+        exit(EXIT_FAILURE);
+    }
+    
+    ml->scale_factors = (double*)malloc(num_scales * sizeof(double));
+    if (!ml->scale_factors) {
+        fprintf(stderr, "Failed to allocate memory for scale factors\n");
+        free(ml->lattices);
+        free(ml);
+        exit(EXIT_FAILURE);
+    }
+    
+    // Create lattices at different scales
+    for (int s = 0; s < num_scales; s++) {
+        ml->scale_factors[s] = pow(2, s);
+        
+        // Create scaled dimensions
+        int* scaled_dimensions = (int*)malloc(num_dimensions * sizeof(int));
+        if (!scaled_dimensions) {
+            fprintf(stderr, "Failed to allocate memory for scaled dimensions\n");
+            
+            // Free previously created lattices
+            for (int i = 0; i < s; i++) {
+                free_lattice(ml->lattices[i]);
+            }
+            
+            free(ml->scale_factors);
+            free(ml->lattices);
+            free(ml);
+            exit(EXIT_FAILURE);
+        }
+        
+        for (int i = 0; i < num_dimensions; i++) {
+            scaled_dimensions[i] = (int)(base_dimensions[i] * ml->scale_factors[s]);
+            if (scaled_dimensions[i] < 1) scaled_dimensions[i] = 1;
+        }
+        
+        ml->lattices[s] = create_lattice(scaled_dimensions, num_dimensions, flow_vector_dimensions,
+                                        num_fractional_dimensions, num_pheromone_markers, global_learning_rate);
+        
+        free(scaled_dimensions);
+    }
+    
+    // Set function pointers
+    ml->initialize = multiscale_lattice_initialize;
+    ml->propagate = multiscale_lattice_propagate;
+    ml->learn = multiscale_lattice_learn;
+    ml->adapt_dimensions = multiscale_lattice_adapt_dimensions;
+    ml->update_flow_vectors = multiscale_lattice_update_flow_vectors;
+    ml->update_pheromone_markers = multiscale_lattice_update_pheromone_markers;
+    ml->update_interactions = multiscale_lattice_update_interactions;
+    
+    return ml;
+}
+
+void free_multiscale_lattice(MultiscaleLattice* ml) {
+    if (!ml) return;
+    
+    if (ml->lattices) {
+        for (int i = 0; i < ml->num_lattices; i++) {
+            free_lattice(ml->lattices[i]);
+        }
+        free(ml->lattices);
+    }
+    
+    free(ml->scale_factors);
+    free(ml);
+}
+
+void multiscale_lattice_initialize(MultiscaleLattice* ml, int state_dimensions, int num_layers) {
+    if (!ml) return;
+    
+    for (int i = 0; i < ml->num_lattices; i++) {
+        for (int j = 0; j < ml->lattices[i]->total_nodes; j++) {
+            ml->lattices[i]->nodes[j]->initialize(ml->lattices[i]->nodes[j], state_dimensions, num_layers);
+        }
+    }
+}
+
+double* multiscale_lattice_propagate(MultiscaleLattice* ml, const double* input_signal, int input_size, int radius) {
+    if (!ml || !input_signal || input_size <= 0) return NULL;
+    
+    double* output_signal = create_double_array(input_size);
+    memcpy(output_signal, input_signal, input_size * sizeof(double));
+    
+    // Process through each lattice in sequence
+    for (int i = 0; i < ml->num_lattices; i++) {
+        double* lattice_output = ml->lattices[i]->propagate(ml->lattices[i], output_signal, input_size, radius);
+        
+        if (lattice_output) {
+            // Use the output of this lattice as input to the next
+            int output_size = ml->lattices[i]->nodes[0]->get_state_dim(ml->lattices[i]->nodes[0]);
+            int min_size = output_size < input_size ? output_size : input_size;
+            
+            memcpy(output_signal, lattice_output, min_size * sizeof(double));
+        }
+    }
+    
+    return output_signal;
+}
+
+void multiscale_lattice_learn(MultiscaleLattice* ml, const double* target_signal, int target_size) {
+    if (!ml || !target_signal || target_size <= 0) return;
+    
+    double* error_signal = create_double_array(target_size);
+    memcpy(error_signal, target_signal, target_size * sizeof(double));
+    
+    // Learn from last lattice to first (backward)
+    for (int i = ml->num_lattices - 1; i >= 0; i--) {
+        ml->lattices[i]->learn(ml->lattices[i], error_signal, target_size);
+        
+        // Propagate error to previous lattice (simplified)
+        if (i > 0) {
+            for (int j = 0; j < target_size; j++) {
+                error_signal[j] *= 0.9;  // Simple decay
+            }
+        }
+    }
+    
+    free_double_array(error_signal);
+}
+
+void multiscale_lattice_adapt_dimensions(MultiscaleLattice* ml, int* new_base_dimensions, int num_dimensions, double performance_metric) {
+    if (!ml || !new_base_dimensions || num_dimensions <= 0) return;
+    
+    for (int i = 0; i < ml->num_lattices; i++) {
+        // Create scaled dimensions
+        int* scaled_dimensions = (int*)malloc(num_dimensions * sizeof(int));
+        if (!scaled_dimensions) {
+            fprintf(stderr, "Failed to allocate memory for scaled dimensions\n");
+            return;
+        }
+        
+        for (int j = 0; j < num_dimensions; j++) {
+            double scale = ml->scale_factors[i] * (1.0 + 0.1 * performance_metric);
+            scaled_dimensions[j] = (int)(new_base_dimensions[j] * scale);
+            if (scaled_dimensions[j] < 1) scaled_dimensions[j] = 1;
+        }
+        
+        ml->lattices[i]->adapt_dimensions(ml->lattices[i], scaled_dimensions, num_dimensions, performance_metric);
+        
+        free(scaled_dimensions);
+    }
+}
+
+void multiscale_lattice_update_flow_vectors(MultiscaleLattice* ml) {
+    if (!ml) return;
+    
+    for (int i = 0; i < ml->num_lattices; i++) {
+        ml->lattices[i]->update_flow_vectors(ml->lattices[i]);
+    }
+}
+
+void multiscale_lattice_update_pheromone_markers(MultiscaleLattice* ml) {
+    if (!ml) return;
+    
+    // Simple placeholder implementation
+    for (int i = 0; i < ml->num_lattices; i++) {
+        for (int j = 0; j < ml->lattices[i]->total_nodes; j++) {
+            Node* node = ml->lattices[i]->nodes[j];
+            
+            // Decay existing pheromones
+            for (int k = 0; k < node->num_pheromone_markers; k++) {
+                node->pheromone_markers[k] *= 0.9;
+            }
+            
+            // Add new pheromones based on node activity
+            double node_activity = vector_magnitude(node->state, node->state_dimensions);
+            for (int k = 0; k < node->num_pheromone_markers; k++) {
+                node->pheromone_markers[k] += 0.1 * node_activity * random_uniform();
+            }
+        }
+    }
+}
+
+void multiscale_lattice_update_interactions(MultiscaleLattice* ml) {
+    if (!ml) return;
+    
+    // Basic implementation of inter-lattice interactions
+    for (int i = 0; i < ml->num_lattices; i++) {
+        for (int j = 0; j < ml->lattices[i]->total_nodes; j++) {
+            Node* node = ml->lattices[i]->nodes[j];
+            
+            // Get indices of this node
+            int* indices = ml->lattices[i]->get_nd_indices(ml->lattices[i], j);
+            if (!indices) continue;
+            
+            // Try to find corresponding nodes in other lattices
+            for (int k = 0; k < ml->num_lattices; k++) {
+                if (k == i) continue;  // Skip self
+                
+                // Scale indices to the other lattice
+                int* scaled_indices = (int*)malloc(ml->lattices[k]->num_dimensions * sizeof(int));
+                if (!scaled_indices) {
+                    fprintf(stderr, "Failed to allocate memory for scaled indices\n");
+                    free(indices);
+                    return;
+                }
+                
+                for (int d = 0; d < ml->lattices[k]->num_dimensions; d++) {
+                    double scale_ratio = d < ml->lattices[i]->num_dimensions ? 
+                                        (double)ml->lattices[k]->dimensions[d] / ml->lattices[i]->dimensions[d] : 1.0;
+                    
+                    scaled_indices[d] = d < ml->lattices[i]->num_dimensions ? 
+                                       (int)(indices[d] * scale_ratio) : 0;
+                                       
+                    if (scaled_indices[d] >= ml->lattices[k]->dimensions[d]) {
+                        scaled_indices[d] = ml->lattices[k]->dimensions[d] - 1;
+                    }
+                }
+                
+                // Get corresponding node in other lattice
+                int other_idx = ml->lattices[k]->get_1d_index(ml->lattices[k], scaled_indices);
+                if (other_idx >= 0 && other_idx < ml->lattices[k]->total_nodes) {
+                    Node* other_node = ml->lattices[k]->nodes[other_idx];
+                    
+                    // Bidirectional interaction (simplified)
+                    // In a real system, this would be more complex
+                    double interaction_strength = 0.1;
+                    int min_dim = node->state_dimensions < other_node->state_dimensions ? 
+                                 node->state_dimensions : other_node->state_dimensions;
+                    
+                    for (int d = 0; d < min_dim; d++) {
+                        // Average the states
+                        double avg = (node->state[d] + other_node->state[d]) / 2.0;
+                        node->state[d] = node->state[d] * (1 - interaction_strength) + avg * interaction_strength;
+                        other_node->state[d] = other_node->state[d] * (1 - interaction_strength) + avg * interaction_strength;
+                    }
+                }
+                
+                free(scaled_indices);
+            }
+            
+            free(indices);
+        }
+    }
+}
+
+// FluidLatticeAI implementation
+
+FluidLatticeAI* create_fluid_lattice_ai(int* dimensions, int num_dimensions, int flow_vector_dimensions, 
+                                      int num_fractional_dimensions, int num_pheromone_markers, int num_scales) {
+    if (!dimensions || num_dimensions <= 0) {
+        fprintf(stderr, "Invalid dimensions for FluidLatticeAI\n");
+        return NULL;
+    }
+    
+    FluidLatticeAI* flai = (FluidLatticeAI*)malloc(sizeof(FluidLatticeAI));
+    if (!flai) {
+        fprintf(stderr, "Failed to allocate memory for FluidLatticeAI\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Create the multiscale lattice
+    flai->multiscale_lattice = create_multiscale_lattice(dimensions, num_dimensions, flow_vector_dimensions,
+                                                      num_fractional_dimensions, num_pheromone_markers, num_scales,
+                                                      INITIAL_LEARNING_RATE);
+    
+    // Initialize input signal
+    flai->input_dimensions = num_dimensions;
+    flai->input_signal = create_double_array(num_dimensions);
+    flai->performance_metric = 0.0;
+    
+    // Set adaptability parameters
+    flai->evaporation_threshold = 0.8;
+    flai->condensation_threshold = 0.2;
+    flai->sublimation_threshold = 0.9;
+    flai->dissolution_threshold = 0.3;
+    flai->crystallization_factor = 0.5;
+    flai->melting_factor = 0.1;
+    flai->freezing_threshold = 0.01;
+    flai->learning_rate_decay = 0.9;
+    
+    // Set function pointers
+    flai->initialize = fluid_lattice_ai_initialize;
+    flai->process = fluid_lattice_ai_process;
+    flai->learn = fluid_lattice_ai_learn;
+    flai->adapt_dimensions = fluid_lattice_ai_adapt_dimensions;
+    flai->update_flow_vectors = fluid_lattice_ai_update_flow_vectors;
+    flai->generate_creative_output = fluid_lattice_ai_generate_creative_output;
+    flai->calculate_error = fluid_lattice_ai_calculate_error;
+    flai->evaporate = fluid_lattice_ai_evaporate;
+    flai->condense = fluid_lattice_ai_condense;
+    flai->sublimate = fluid_lattice_ai_sublimate;
+    flai->dissolve = fluid_lattice_ai_dissolve;
+    flai->crystallize = fluid_lattice_ai_crystallize;
+    flai->melt = fluid_lattice_ai_melt;
+    flai->freeze = fluid_lattice_ai_freeze;
+    flai->should_evaporate = fluid_lattice_ai_should_evaporate;
+    flai->should_condense = fluid_lattice_ai_should_condense;
+    flai->should_sublimate = fluid_lattice_ai_should_sublimate;
+    flai->should_dissolve = fluid_lattice_ai_should_dissolve;
+    flai->should_crystallize = fluid_lattice_ai_should_crystallize;
+    flai->should_melt = fluid_lattice_ai_should_melt;
+    flai->should_freeze = fluid_lattice_ai_should_freeze;
+    
+    return flai;
+}
+
+void free_fluid_lattice_ai(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    free_multiscale_lattice(flai->multiscale_lattice);
+    free_double_array(flai->input_signal);
+    free(flai);
+}
+
+void fluid_lattice_ai_initialize(FluidLatticeAI* flai, int state_dimensions, int num_layers) {
+    if (!flai) return;
+    
+    flai->multiscale_lattice->initialize(flai->multiscale_lattice, state_dimensions, num_layers);
+}
+
+double* fluid_lattice_ai_process(FluidLatticeAI* flai, const double* input_signal, int input_size, int radius) {
+    if (!flai || !input_signal || input_size <= 0) return NULL;
+    
+    // Store input signal
+    int min_size = input_size < flai->input_dimensions ? input_size : flai->input_dimensions;
+    memcpy(flai->input_signal, input_signal, min_size * sizeof(double));
+    
+    // Process through multiscale lattice
+    return flai->multiscale_lattice->propagate(flai->multiscale_lattice, input_signal, input_size, radius);
+}
+
+void fluid_lattice_ai_learn(FluidLatticeAI* flai, const double* target_signal, int target_size) {
+    if (!flai || !target_signal || target_size <= 0) return;
+    
+    double prev_error = flai->calculate_error(flai, target_signal, target_size);
+    
+    // Learn through multiscale lattice
+    flai->multiscale_lattice->learn(flai->multiscale_lattice, target_signal, target_size);
+    
+    double current_error = flai->calculate_error(flai, target_signal, target_size);
+    
+    // Adapt based on error changes
+    if (flai->should_evaporate(flai, prev_error, current_error)) {
+        flai->evaporate(flai);
+    } else if (flai->should_condense(flai, prev_error, current_error)) {
+        flai->condense(flai);
+    } else if (flai->should_sublimate(flai, prev_error, current_error)) {
+        flai->sublimate(flai);
+    } else if (flai->should_dissolve(flai, prev_error, current_error)) {
+        flai->dissolve(flai);
+    }
+    
+    if (flai->should_crystallize(flai, prev_error, current_error)) {
+        flai->crystallize(flai);
+    } else if (flai->should_melt(flai, prev_error, current_error)) {
+        flai->melt(flai);
+    }
+    
+    if (flai->should_freeze(flai, current_error)) {
+        flai->freeze(flai);
+    }
+    
+    // Update performance metric (1.0 - normalized error)
+    flai->performance_metric = 1.0 - (current_error / (current_error + 1.0));
+}
+
+void fluid_lattice_ai_adapt_dimensions(FluidLatticeAI* flai, const int* new_dimensions, int num_dimensions) {
+    if (!flai || !new_dimensions || num_dimensions <= 0) return;
+    
+    flai->multiscale_lattice->adapt_dimensions(flai->multiscale_lattice, (int*)new_dimensions, num_dimensions, flai->performance_metric);
+    
+    // Update input dimensions if needed
+    if (num_dimensions != flai->input_dimensions) {
+        free_double_array(flai->input_signal);
+        flai->input_dimensions = num_dimensions;
+        flai->input_signal = create_double_array(num_dimensions);
+    }
+}
+
+void fluid_lattice_ai_update_flow_vectors(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    flai->multiscale_lattice->update_flow_vectors(flai->multiscale_lattice);
+}
+
+double* fluid_lattice_ai_generate_creative_output(FluidLatticeAI* flai, const double* input_signal, int input_size, int num_iterations) {
+    if (!flai || !input_signal || input_size <= 0) return NULL;
+    
+    double* output_signal = create_double_array(input_size);
+    memcpy(output_signal, input_signal, input_size * sizeof(double));
+    
+    // Iteratively process the signal to generate creative output
+    for (int i = 0; i < num_iterations; i++) {
+        double* new_output = flai->process(flai, output_signal, input_size, 1);
+        
+        if (new_output) {
+            // Introduce some randomness to enhance creativity
+            for (int j = 0; j < input_size; j++) {
+                output_signal[j] = new_output[j] + 0.05 * random_normal();
+            }
+            
+            free_double_array(new_output);
+        }
+    }
+    
+    return output_signal;
+}
+
+double fluid_lattice_ai_calculate_error(FluidLatticeAI* flai, const double* target_signal, int target_size) {
+    if (!flai || !target_signal || target_size <= 0) return DBL_MAX;
+    
+    // Process the input signal
+    double* output_signal = flai->process(flai, flai->input_signal, flai->input_dimensions, 1);
+    if (!output_signal) return DBL_MAX;
+    
+    // Calculate MSE
+    double sum_squared_error = 0.0;
+    int min_size = target_size < flai->input_dimensions ? target_size : flai->input_dimensions;
+    
+    for (int i = 0; i < min_size; i++) {
+        double error = output_signal[i] - target_signal[i];
+        sum_squared_error += error * error;
+    }
+    
+    free_double_array(output_signal);
+    
+    return sum_squared_error / min_size;
+}
+
+void fluid_lattice_ai_evaporate(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Increase learning rates and reduce regularization
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= 2.0;
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * 2.0);
+            node->regularization_term *= 0.5;
+            node->total_dynamism *= 1.2;
+        }
+    }
+}
+
+void fluid_lattice_ai_condense(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Decrease learning rates and increase regularization
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= 0.5;
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * 0.5);
+            node->regularization_term *= 2.0;
+            node->total_dynamism *= 0.8;
+        }
+    }
+}
+
+void fluid_lattice_ai_sublimate(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Greatly increase learning rates and greatly reduce regularization
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= 5.0;
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * 5.0);
+            node->regularization_term *= 0.2;
+            node->total_dynamism *= 1.5;
+        }
+    }
+}
+
+void fluid_lattice_ai_dissolve(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Moderately decrease learning rates and moderately increase regularization
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= 0.8;
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * 0.8);
+            node->regularization_term *= 1.2;
+            node->total_dynamism *= 0.9;
+        }
+    }
+}
+
+void fluid_lattice_ai_crystallize(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Reduce learning rates based on crystallization factor
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= flai->crystallization_factor;
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * flai->crystallization_factor);
+            node->total_dynamism *= 0.6;
+        }
+    }
+}
+
+void fluid_lattice_ai_melt(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Increase learning rates and decrease regularization based on melting factor
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= (1.0 + flai->melting_factor);
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * (1.0 + flai->melting_factor));
+            node->regularization_term *= (1.0 - flai->melting_factor);
+            node->total_dynamism *= 1.1;
+        }
+    }
+}
+
+void fluid_lattice_ai_freeze(FluidLatticeAI* flai) {
+    if (!flai) return;
+    
+    // Decrease learning rates based on learning rate decay
+    for (int i = 0; i < flai->multiscale_lattice->num_lattices; i++) {
+        Lattice* lattice = flai->multiscale_lattice->lattices[i];
+        lattice->global_learning_rate *= flai->learning_rate_decay;
+        
+        for (int j = 0; j < lattice->total_nodes; j++) {
+            Node* node = lattice->nodes[j];
+            node->set_learning_rate(node, node->get_learning_rate(node) * flai->learning_rate_decay);
+            node->total_dynamism *= 0.7;
+        }
+    }
+}
+
+bool fluid_lattice_ai_should_evaporate(FluidLatticeAI* flai, double previous_error, double current_error) {
+    if (!flai) return false;
+    
+    // Small improvement or regression
+    return (previous_error - current_error) < flai->evaporation_threshold;
+}
+
+bool fluid_lattice_ai_should_condense(FluidLatticeAI* flai, double previous_error, double current_error) {
+    if (!flai) return false;
+    
+    // Moderate improvement
+    return (previous_error - current_error) > flai->condensation_threshold;
+}
+
+bool fluid_lattice_ai_should_sublimate(FluidLatticeAI* flai, double previous_error, double current_error) {
+    if (!flai) return false;
+    
+    // Very small improvement or significant regression
+    return (previous_error - current_error) < flai->sublimation_threshold;
+}
+
+bool fluid_lattice_ai_should_dissolve(FluidLatticeAI* flai, double previous_error, double current_error) {
+    if (!flai) return false;
+    
+    // Large improvement
+    return (previous_error - current_error) > flai->dissolution_threshold;
+}
+
+bool fluid_lattice_ai_should_crystallize(FluidLatticeAI* flai, double previous_error, double current_error) {
+    if (!flai) return false;
+    
+    double significant_improvement_threshold = 0.1;
+    return (previous_error - current_error) > significant_improvement_threshold;
+}
+
+bool fluid_lattice_ai_should_melt(FluidLatticeAI* flai, double previous_error, double current_error) {
+    if (!flai) return false;
+    
+    double minimal_improvement_threshold = 0.01;
+    return (current_error > previous_error) || (previous_error - current_error < minimal_improvement_threshold);
+}
+
+bool fluid_lattice_ai_should_freeze(FluidLatticeAI* flai, double current_error) {
+    if (!flai) return false;
+    
+    return current_error < flai->freezing_threshold;
+}
+
+// KnowledgeGraph implementation
+
+KnowledgeGraph* create_knowledge_graph(int max_entities, int max_links) {
+    KnowledgeGraph* kg = (KnowledgeGraph*)malloc(sizeof(KnowledgeGraph));
+    if (!kg) {
+        fprintf(stderr, "Failed to allocate memory for KnowledgeGraph\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    kg->entity_names = (char**)malloc(max_entities * sizeof(char*));
+    if (!kg->entity_names) {
+        fprintf(stderr, "Failed to allocate memory for entity names\n");
+        free(kg);
+        exit(EXIT_FAILURE);
+    }
+    
+    for (int i = 0; i < max_entities; i++) {
+        kg->entity_names[i] = NULL;
+    }
+    
+    kg->links = (KnowledgeLink*)malloc(max_links * sizeof(KnowledgeLink));
+    if (!kg->links) {
+        fprintf(stderr, "Failed to allocate memory for knowledge links\n");
+        free(kg->entity_names);
+        free(kg);
+        exit(EXIT_FAILURE);
+    }
+    
+    kg->num_entities = 0;
+    kg->max_entities = max_entities;
+    kg->num_links = 0;
+    kg->max_links = max_links;
+    
+    return kg;
+}
+
+void free_knowledge_graph(KnowledgeGraph* kg) {
+    if (!kg) return;
+    
+    if (kg->entity_names) {
+        for (int i = 0; i < kg->num_entities; i++) {
+            free(kg->entity_names[i]);
+        }
+        free(kg->entity_names);
+    }
+    
+    if (kg->links) {
+        free(kg->links);
+    }
+    
+    free(kg);
+}
+
+void knowledge_graph_add_entity(KnowledgeGraph* kg, const char* entity_name) {
+    if (!kg || !entity_name) return;
+    
+    // Check if entity already exists
+    for (int i = 0; i < kg->num_entities; i++) {
+        if (strcmp(kg->entity_names[i], entity_name) == 0) {
+            return; // Entity already exists
+        }
+    }
+    
+    // Check if we have space
+    if (kg->num_entities >= kg->max_entities) {
+        fprintf(stderr, "Knowledge graph at maximum entity capacity\n");
+        return;
+    }
+    
+    // Allocate and copy the entity name
+    kg->entity_names[kg->num_entities] = strdup(entity_name);
+    if (!kg->entity_names[kg->num_entities]) {
+        fprintf(stderr, "Failed to allocate memory for entity name\n");
+        return;
+    }
+    
+    kg->num_entities++;
+}
+
+void knowledge_graph_add_link(KnowledgeGraph* kg, int source, int target, double weight, const char* relation_type) {
+    if (!kg || !relation_type || source < 0 || source >= kg->num_entities || 
+        target < 0 || target >= kg->num_entities) {
+        return;
+    }
+    
+    // Check if link already exists
+    for (int i = 0; i < kg->num_links; i++) {
+        if (kg->links[i].source == source && kg->links[i].target == target &&
+            strcmp(kg->links[i].relation_type, relation_type) == 0) {
+            
+            // Update weight if link exists
+            kg->links[i].weight = weight;
+            return;
+        }
+    }
+    
+    // Check if we have space
+    if (kg->num_links >= kg->max_links) {
+        fprintf(stderr, "Knowledge graph at maximum link capacity\n");
+        return;
+    }
+    
+    // Add new link
+    kg->links[kg->num_links].source = source;
+    kg->links[kg->num_links].target = target;
+    kg->links[kg->num_links].weight = weight;
+    strncpy(kg->links[kg->num_links].relation_type, relation_type, MAX_STRING_LENGTH - 1);
+    kg->links[kg->num_links].relation_type[MAX_STRING_LENGTH - 1] = '\0';
+    
+    kg->num_links++;
+}
+
+int knowledge_graph_find_entity(KnowledgeGraph* kg, const char* entity_name) {
+    if (!kg || !entity_name) return -1;
+    
+    for (int i = 0; i < kg->num_entities; i++) {
+        if (strcmp(kg->entity_names[i], entity_name) == 0) {
+            return i;
+        }
+    }
+    
+    return -1; // Entity not found
+}
+
+void knowledge_graph_update_link_weight(KnowledgeGraph* kg, int source, int target, double weight_delta) {
+    if (!kg || source < 0 || source >= kg->num_entities || 
+        target < 0 || target >= kg->num_entities) {
+        return;
+    }
+    
+    for (int i = 0; i < kg->num_links; i++) {
+        if (kg->links[i].source == source && kg->links[i].target == target) {
+            kg->links[i].weight += weight_delta;
+            return;
+        }
+    }
+}
+
+// ReinforcementLearning implementation
+
+ReinforcementLearning* create_reinforcement_learning(int num_states, int num_actions) {
+    ReinforcementLearning* rl = (ReinforcementLearning*)malloc(sizeof(ReinforcementLearning));
+    if (!rl) {
+        fprintf(stderr, "Failed to allocate memory for ReinforcementLearning\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    rl->num_states = num_states;
+    rl->num_actions = num_actions;
+    rl->learning_rate = 0.1;
+    rl->discount_factor = 0.9;
+    rl->exploration_rate = 0.1;
+    
+    // Allocate Q-values table
+    rl->q_values = (double**)malloc(num_states * sizeof(double*));
+    if (!rl->q_values) {
+        fprintf(stderr, "Failed to allocate memory for Q-values table\n");
+        free(rl);
+        exit(EXIT_FAILURE);
+    }
+    
+    for (int i = 0; i < num_states; i++) {
+        rl->q_values[i] = (double*)malloc(num_actions * sizeof(double));
+        if (!rl->q_values[i]) {
+            fprintf(stderr, "Failed to allocate memory for Q-values row\n");
+            
+            // Free previously allocated rows
+            for (int j = 0; j < i; j++) {
+                free(rl->q_values[j]);
+            }
+            
+            free(rl->q_values);
+            free(rl);
+            exit(EXIT_FAILURE);
+        }
+        
+        // Initialize Q-values to small random values
+        for (int j = 0; j < num_actions; j++) {
+            rl->q_values[i][j] = random_uniform() * 0.1;
+        }
+    }
+    
+    return rl;
+}
+
+void free_reinforcement_learning(ReinforcementLearning* rl) {
+    if (!rl) return;
+    
+    if (rl->q_values) {
+        for (int i = 0; i < rl->num_states; i++) {
+            free(rl->q_values[i]);
+        }
+        free(rl->q_values);
+    }
+    
+    free(rl);
+}
+
+double reinforcement_learning_select_action_epsilon_greedy(ReinforcementLearning* rl, int state) {
+    if (!rl || state < 0 || state >= rl->num_states) return 0;
+    
+    // Epsilon-greedy action selection
+    if (random_uniform() < rl->exploration_rate) {
+        // Explore: choose a random action
+        return rand() % rl->num_actions;
+    } else {
+        // Exploit: choose the best action
+        double max_q_value = rl->q_values[state][0];
+        int best_action = 0;
+        
+        for (int a = 1; a < rl->num_actions; a++) {
+            if (rl->q_values[state][a] > max_q_value) {
+                max_q_value = rl->q_values[state][a];
+                best_action = a;
+            }
+        }
+        
+        return best_action;
+    }
+}
+
+void reinforcement_learning_update_q_values(ReinforcementLearning* rl, int state, int action, int next_state, double reward) {
+    if (!rl || state < 0 || state >= rl->num_states || 
+        action < 0 || action >= rl->num_actions ||
+        next_state < 0 || next_state >= rl->num_states) {
+        return;
+    }
+    
+    // Find maximum Q-value for the next state
+    double max_next_q_value = rl->q_values[next_state][0];
+    for (int a = 1; a < rl->num_actions; a++) {
+        if (rl->q_values[next_state][a] > max_next_q_value) {
+            max_next_q_value = rl->q_values[next_state][a];
+        }
+    }
+    
+    // Q-learning update rule
+    double current_q = rl->q_values[state][action];
+    double target_q = reward + rl->discount_factor * max_next_q_value;
+    rl->q_values[state][action] = current_q + rl->learning_rate * (target_q - current_q);
+}
+
+// AGI implementation
+
+AGI* create_agi() {
+    AGI* agi = (AGI*)malloc(sizeof(AGI));
+    if (!agi) {
+        fprintf(stderr, "Failed to allocate memory for AGI\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    // Initialize basic parameters
+    int default_dimensions[3] = {8, 8, 8};
+    agi->fluid_lattice_ai = create_fluid_lattice_ai(default_dimensions, 3, 4, 5, 3, 2);
+    agi->knowledge_graph = create_knowledge_graph(MAX_ENTITIES, MAX_CONNECTIONS);
+    agi->reinforcement_learning = create_reinforcement_learning(100, 10);
+    
+    // Initialize metrics
+    agi->consciousness.type = METRIC_CONSCIOUSNESS;
+    agi->consciousness.current_value = 0.1;
+    agi->consciousness.history_size = 0;
+    
+    agi->spirit_level.type = METRIC_SPIRIT_LEVEL;
+    agi->spirit_level.current_value = 0.1;
+    agi->spirit_level.history_size = 0;
+    
+    agi->flow_level.type = METRIC_FLOW_LEVEL;
+    agi->flow_level.current_value = 0.1;
+    agi->flow_level.history_size = 0;
+    
+    // Allocate pattern storage
+    agi->patterns = (Pattern*)malloc(MAX_PATTERNS * sizeof(Pattern));
+    if (!agi->patterns) {
+        fprintf(stderr, "Failed to allocate memory for patterns\n");
+        free_fluid_lattice_ai(agi->fluid_lattice_ai);
+        free_knowledge_graph(agi->knowledge_graph);
+        free_reinforcement_learning(agi->reinforcement_learning);
+        free(agi);
+        exit(EXIT_FAILURE);
+    }
+    agi->num_patterns = 0;
+    
+    // Allocate goals
+    agi->goals = (Goal*)malloc(MAX_GOALS * sizeof(Goal));
+    if (!agi->goals) {
+        fprintf(stderr, "Failed to allocate memory for goals\n");
+        free_fluid_lattice_ai(agi->fluid_lattice_ai);
+        free_knowledge_graph(agi->knowledge_graph);
+        free_reinforcement_learning(agi->reinforcement_learning);
+        free(agi->patterns);
+        free(agi);
+        exit(EXIT_FAILURE);
+    }
+    agi->num_goals = 0;
+    
+    // Allocate experiences
+    agi->experiences = (Experience*)malloc(MAX_ARRAY_LENGTH * sizeof(Experience));
+    if (!agi->experiences) {
+        fprintf(stderr, "Failed to allocate memory for experiences\n");
+        free_fluid_lattice_ai(agi->fluid_lattice_ai);
+        free_knowledge_graph(agi->knowledge_graph);
+        free_reinforcement_learning(agi->reinforcement_learning);
+        free(agi->patterns);
+        free(agi->goals);
+        free(agi);
+        exit(EXIT_FAILURE);
+    }
+    agi->num_experiences = 0;
+    
+    // Allocate learning strategies
+    agi->learning_strategies = (LearningStrategy*)malloc(10 * sizeof(LearningStrategy));
+    if (!agi->learning_strategies) {
+        fprintf(stderr, "Failed to allocate memory for learning strategies\n");
+        free_fluid_lattice_ai(agi->fluid_lattice_ai);
+        free_knowledge_graph(agi->knowledge_graph);
+        free_reinforcement_learning(agi->reinforcement_learning);
+        free(agi->patterns);
+        free(agi->goals);
+        free(agi->experiences);
+        free(agi);
+        exit(EXIT_FAILURE);
+    }
+    agi->num_learning_strategies = 0;
+    
+    // Set up basic learning strategy
+    agi->learning_strategies[0].id = 0;
+    strncpy(agi->learning_strategies[0].name, "Epsilon-Greedy", MAX_STRING_LENGTH - 1);
+    agi->learning_strategies[0].learning_rate = 0.1;
+    agi->learning_strategies[0].exploration_rate = 0.1;
+    agi->learning_strategies[0].select_action = reinforcement_learning_select_action_epsilon_greedy;
+    agi->learning_strategies[0].update = reinforcement_learning_update_q_values;
+    agi->num_learning_strategies = 1;
+    
+    // Set function pointers
+    agi->initialize = agi_initialize;
+    agi->perceive_environment = agi_perceive_environment;
+    agi->process_observations = agi_process_observations;
+    agi->monitor_internal_state = agi_monitor_internal_state;
+    agi->select_action = agi_select_action;
+    agi->execute_action = agi_execute_action;
+    agi->learn_from_experience = agi_learn_from_experience;
+    agi->update_knowledge_graph = agi_update_knowledge_graph;
+    agi->generate_creative_idea = agi_generate_creative_idea;
+    agi->calculate_consciousness = agi_calculate_consciousness;
+    agi->calculate_spirit_level = agi_calculate_spirit_level;
+    agi->calculate_flow_level = agi_calculate_flow_level;
+    
+    return agi;
+}
+
+void free_agi(AGI* agi) {
+    if (!agi) return;
+    
+    free_fluid_lattice_ai(agi->fluid_lattice_ai);
+    free_knowledge_graph(agi->knowledge_graph);
+    free_reinforcement_learning(agi->reinforcement_learning);
+    
+    free(agi->patterns);
+    free(agi->goals);
+    free(agi->experiences);
+    free(agi->learning_strategies);
+    
+    free(agi);
+}
+
+void agi_initialize(AGI* agi) {
+    if (!agi) return;
+    
+    // Initialize the fluid lattice AI
+    agi->fluid_lattice_ai->initialize(agi->fluid_lattice_ai, 10, 3);
+    
+    // Initialize basic concepts in the knowledge graph
+    knowledge_graph_add_entity(agi->knowledge_graph, "consciousness");
+    knowledge_graph_add_entity(agi->knowledge_graph, "spirit_level");
+    knowledge_graph_add_entity(agi->knowledge_graph, "flow_level");
+    knowledge_graph_add_entity(agi->knowledge_graph, "pattern");
+    knowledge_graph_add_entity(agi->knowledge_graph, "goal");
+    knowledge_graph_add_entity(agi->knowledge_graph, "action");
+    
+    // Add basic relationships
+    int consciousness_idx = knowledge_graph_find_entity(agi->knowledge_graph, "consciousness");
+    int spirit_level_idx = knowledge_graph_find_entity(agi->knowledge_graph, "spirit_level");
+    int flow_level_idx = knowledge_graph_find_entity(agi->knowledge_graph, "flow_level");
+    int pattern_idx = knowledge_graph_find_entity(agi->knowledge_graph, "pattern");
+    int goal_idx = knowledge_graph_find_entity(agi->knowledge_graph, "goal");
+    int action_idx = knowledge_graph_find_entity(agi->knowledge_graph, "action");
+    
+    knowledge_graph_add_link(agi->knowledge_graph, consciousness_idx, spirit_level_idx, 0.5, "influences");
+    knowledge_graph_add_link(agi->knowledge_graph, consciousness_idx, flow_level_idx, 0.7, "influences");
+    knowledge_graph_add_link(agi->knowledge_graph, spirit_level_idx, flow_level_idx, 0.3, "influences");
+    knowledge_graph_add_link(agi->knowledge_graph, pattern_idx, goal_idx, 0.6, "informs");
+    knowledge_graph_add_link(agi->knowledge_graph, goal_idx, action_idx, 0.8, "drives");
+    
+    // Set up initial goal
+    if (agi->num_goals == 0) {
+        agi->goals[0].id = 0;
+        strncpy(agi->goals[0].description, "Learn and adapt from experiences", MAX_STRING_LENGTH - 1);
+        agi->goals[0].priority = 0.9;
+        agi->goals[0].prerequisites = NULL;
+        agi->goals[0].num_prerequisites = 0;
+        agi->goals[0].conflicting_goals = NULL;
+        agi->goals[0].num_conflicting = 0;
+        agi->goals[0].success_metric = 0.0;
+        agi->num_goals = 1;
+    }
+}
+
+void agi_perceive_environment(AGI* agi, double* sensor_data, int sensor_data_size) {
+    if (!agi || !sensor_data || sensor_data_size <= 0) return;
+    
+    // Process sensor data through fluid lattice
+    double* perception_result = agi->fluid_lattice_ai->process(
+        agi->fluid_lattice_ai, sensor_data, sensor_data_size, LATTICE_DEFAULT_RADIUS);
+    
+    if (!perception_result) return;
+    
+    // Use the results to update patterns
+    if (agi->num_patterns < MAX_PATTERNS) {
+        Pattern* new_pattern = &agi->patterns[agi->num_patterns];
+        
+        new_pattern->type = PATTERN_LIGHT; // default type
+        snprintf(new_pattern->name, MAX_STRING_LENGTH, "pattern_%d", agi->num_patterns);
+        
+        // Store the perception result in the pattern values
+        int state_dim = agi->fluid_lattice_ai->multiscale_lattice->lattices[0]->nodes[0]->state_dimensions;
+        new_pattern->num_values = state_dim;
+        new_pattern->values = (double*)malloc(state_dim * sizeof(double));
+        
+        if (new_pattern->values) {
+            memcpy(new_pattern->values, perception_result, state_dim * sizeof(double));
+            new_pattern->confidence = 0.5; // Initial confidence
+            agi->num_patterns++;
+        }
+    }
+}
+
+void agi_process_observations(AGI* agi) {
+    if (!agi) return;
+    
+    // Find patterns in the observations
+    for (int i = 0; i < agi->num_patterns; i++) {
+        // Calculate fractal dimension of the pattern
+        double fractal_dim = calculate_fractal_dimension(agi->patterns[i].values, agi->patterns[i].num_values);
+        
+        // Update pattern confidence based on fractal dimension
+        // Higher fractal dimension = more complex pattern = potentially more interesting
+        agi->patterns[i].confidence = 0.5 + 0.1 * fractal_dim;
+        
+        // Update pattern type based on characteristics
+        double sum = 0.0;
+        double max_val = agi->patterns[i].values[0];
+        double min_val = agi->patterns[i].values[0];
+        
+        for (int j = 0; j < agi->patterns[i].num_values; j++) {
+            sum += agi->patterns[i].values[j];
+            if (agi->patterns[i].values[j] > max_val) max_val = agi->patterns[i].values[j];
+            if (agi->patterns[i].values[j] < min_val) min_val = agi->patterns[i].values[j];
+        }
+        
+        double average = sum / agi->patterns[i].num_values;
+        double range = max_val - min_val;
+        
+        if (range > 0.8) {
+            agi->patterns[i].type = PATTERN_SOUND; // high variability
+        } else if (average > 0.7) {
+            agi->patterns[i].type = PATTERN_CONCEPT; // high activation
+        } else if (fractal_dim > 1.5) {
+            agi->patterns[i].type = PATTERN_BEHAVIOR; // complex structure
+        }
+        
+        // Add pattern to knowledge graph if confidence is high enough
+        if (agi->patterns[i].confidence > 0.7) {
+            // Add pattern entity
+            char pattern_name[MAX_STRING_LENGTH];
+            snprintf(pattern_name, MAX_STRING_LENGTH, "pattern_%d", i);
+            knowledge_graph_add_entity(agi->knowledge_graph, pattern_name);
+            
+            // Add relationship to pattern type
+            int pattern_idx = knowledge_graph_find_entity(agi->knowledge_graph, pattern_name);
+            int pattern_type_idx = knowledge_graph_find_entity(agi->knowledge_graph, "pattern");
+            
+            if (pattern_idx >= 0 && pattern_type_idx >= 0) {
+                knowledge_graph_add_link(agi->knowledge_graph, pattern_idx, pattern_type_idx, 
+                                       agi->patterns[i].confidence, "instance_of");
+            }
+        }
+    }
+}
+
+void agi_monitor_internal_state(AGI* agi) {
+    if (!agi) return;
+    
+    // Update consciousness metric
+    agi->consciousness.current_value = agi->calculate_consciousness(agi);
+    
+    // Store in history
+    if (agi->consciousness.history_size < MAX_ARRAY_LENGTH) {
+        agi->consciousness.recent_history[agi->consciousness.history_size++] = agi->consciousness.current_value;
+    } else {
+        // Shift history and add new value
+        for (int i = 0; i < MAX_ARRAY_LENGTH - 1; i++) {
+            agi->consciousness.recent_history[i] = agi->consciousness.recent_history[i + 1];
+        }
+        agi->consciousness.recent_history[MAX_ARRAY_LENGTH - 1] = agi->consciousness.current_value;
+    }
+    
+    // Update spirit level metric
+    agi->spirit_level.current_value = agi->calculate_spirit_level(agi);
+    
+    // Store in history
+    if (agi->spirit_level.history_size < MAX_ARRAY_LENGTH) {
+        agi->spirit_level.recent_history[agi->spirit_level.history_size++] = agi->spirit_level.current_value;
+    } else {
+        // Shift history and add new value
+        for (int i = 0; i < MAX_ARRAY_LENGTH - 1; i++) {
+            agi->spirit_level.recent_history[i] = agi->spirit_level.recent_history[i + 1];
+        }
+        agi->spirit_level.recent_history[MAX_ARRAY_LENGTH - 1] = agi->spirit_level.current_value;
+    }
+    
+    // Update flow level metric
+    agi->flow_level.current_value = agi->calculate_flow_level(agi);
+    
+    // Store in history
+    if (agi->flow_level.history_size < MAX_ARRAY_LENGTH) {
+        agi->flow_level.recent_history[agi->flow_level.history_size++] = agi->flow_level.current_value;
+    } else {
+        // Shift history and add new value
+        for (int i = 0; i < MAX_ARRAY_LENGTH - 1; i++) {
+            agi->flow_level.recent_history[i] = agi->flow_level.recent_history[i + 1];
+        }
+        agi->flow_level.recent_history[MAX_ARRAY_LENGTH - 1] = agi->flow_level.current_value;
+    }
+    
+    // Check for cross-metric conditions that might trigger goal updates
+    if (agi->consciousness.current_value > 0.8 && agi->flow_level.current_value < 0.3) {
+        // High consciousness but low flow might indicate overthinking
+        // Add a goal to encourage more flow-based thinking
+        if (agi->num_goals < MAX_GOALS) {
+            agi->goals[agi->num_goals].id = agi->num_goals;
+            strncpy(agi->goals[agi->num_goals].description, "Increase flow state engagement", MAX_STRING_LENGTH - 1);
+            agi->goals[agi->num_goals].priority = 0.7;
+            agi->goals[agi->num_goals].prerequisites = NULL;
+            agi->goals[agi->num_goals].num_prerequisites = 0;
+            agi->goals[agi->num_goals].conflicting_goals = NULL;
+            agi->goals[agi->num_goals].num_conflicting = 0;
+            agi->goals[agi->num_goals].success_metric = 0.0;
+            agi->num_goals++;
+        }
+    }
+    
+    if (agi->flow_level.current_value > 0.8 && agi->consciousness.current_value < 0.3) {
+        // High flow but low consciousness might indicate lack of awareness
+        // Add a goal to increase conscious processing
+        if (agi->num_goals < MAX_GOALS) {
+            agi->goals[agi->num_goals].id = agi->num_goals;
+            strncpy(agi->goals[agi->num_goals].description, "Increase conscious awareness", MAX_STRING_LENGTH - 1);
+            agi->goals[agi->num_goals].priority = 0.8;
+            agi->goals[agi->num_goals].prerequisites = NULL;
+            agi->goals[agi->num_goals].num_prerequisites = 0;
+            agi->goals[agi->num_goals].conflicting_goals = NULL;
+            agi->goals[agi->num_goals].num_conflicting = 0;
+            agi->goals[agi->num_goals].success_metric = 0.0;
+            agi->num_goals++;
+        }
+    }
+}
+
+void agi_select_action(AGI* agi, Action* action) {
+    if (!agi || !action) return;
+    
+    // Find the highest priority goal
+    int highest_priority_goal = 0;
+    double highest_priority = 0.0;
+    
+    for (int i = 0; i < agi->num_goals; i++) {
+        if (agi->goals[i].priority > highest_priority) {
+            highest_priority = agi->goals[i].priority;
+            highest_priority_goal = i;
+        }
+    }
+    
+    // Map goal to a state in the reinforcement learning system
+    int state = highest_priority_goal % agi->reinforcement_learning->num_states;
+    
+    // Use reinforcement learning to select an action
+    int selected_action = (int)agi->learning_strategies[0].select_action(agi->reinforcement_learning, state);
+    
+    // Fill in the action structure
+    action->id = selected_action;
+    snprintf(action->description, MAX_STRING_LENGTH, "Action to advance goal: %s", 
+           agi->goals[highest_priority_goal].description);
+    
+    // Expected utility is based on Q-value
+    action->expected_utility = agi->reinforcement_learning->q_values[state][selected_action];
+    
+    // Generate action parameters based on the current patterns
+    action->num_parameters = 0;
+    action->parameters = NULL;
+    
+    if (agi->num_patterns > 0) {
+        // Use the most confident pattern as action parameters
+        int most_confident_pattern = 0;
+        double highest_confidence = 0.0;
+        
+        for (int i = 0; i < agi->num_patterns; i++) {
+            if (agi->patterns[i].confidence > highest_confidence) {
+                highest_confidence = agi->patterns[i].confidence;
+                most_confident_pattern = i;
+            }
+        }
+        
+        // Copy pattern values as action parameters
+        action->num_parameters = agi->patterns[most_confident_pattern].num_values;
+        action->parameters = create_double_array(action->num_parameters);
+        
+        if (action->parameters) {
+            memcpy(action->parameters, agi->patterns[most_confident_pattern].values, 
+                 action->num_parameters * sizeof(double));
+        }
+    }
+}
+
+void agi_execute_action(AGI* agi, Action* action) {
+    if (!agi || !action) return;
+    
+    // Simulate action execution and observe results
+    printf("Executing action: %s (ID: %d)\n", action->description, action->id);
+    
+    // Update fluid lattice based on action
+    if (action->parameters && action->num_parameters > 0) {
+        // Use action parameters as input signal to update the lattice
+        agi->fluid_lattice_ai->process(agi->fluid_lattice_ai, action->parameters, action->num_parameters, LATTICE_DEFAULT_RADIUS);
+        
+        // Update internal dynamics
+        agi->fluid_lattice_ai->update_flow_vectors(agi->fluid_lattice_ai);
+        agi->fluid_lattice_ai->multiscale_lattice->update_pheromone_markers(agi->fluid_lattice_ai->multiscale_lattice);
+        agi->fluid_lattice_ai->multiscale_lattice->update_interactions(agi->fluid_lattice_ai->multiscale_lattice);
+    }
+    
+    // Record the action in an experience
+    if (agi->num_experiences < MAX_ARRAY_LENGTH) {
+        Experience* exp = &agi->experiences[agi->num_experiences];
+        
+        exp->id = agi->num_experiences;
+        exp->timestamp = time(NULL);
+        
+        // Set event (simplified)
+        exp->event.id = exp->id;
+        strncpy(exp->event.description, "Action execution event", MAX_STRING_LENGTH - 1);
+        exp->event.features = action->parameters;
+        exp->event.num_features = action->num_parameters;
+        exp->event.timestamp = exp->timestamp;
+        
+        // Store action
+        exp->actions = (Action*)malloc(sizeof(Action));
+        if (exp->actions) {
+            exp->num_actions = 1;
+            exp->actions[0] = *action; // Copy the action
+            
+            // Allocate new memory for action parameters to avoid double free
+            if (action->parameters && action->num_parameters > 0) {
+                exp->actions[0].parameters = create_double_array(action->num_parameters);
+                if (exp->actions[0].parameters) {
+                    memcpy(exp->actions[0].parameters, action->parameters, action->num_parameters * sizeof(double));
+                } else {
+                    exp->actions[0].num_parameters = 0;
+                }
+            }
+        } else {
+            exp->num_actions = 0;
+        }
+        
+        // Set utility (initial guess based on expected utility)
+        exp->utility = action->expected_utility;
+        
+        // Allocate observations (results of the action)
+        exp->num_observations = agi->fluid_lattice_ai->multiscale_lattice->lattices[0]->nodes[0]->state_dimensions;
+        exp->observations = create_double_array(exp->num_observations);
+        
+        if (exp->observations) {
+            // Get the state of a node as the observation result
+            if (agi->fluid_lattice_ai->multiscale_lattice->lattices[0]->total_nodes > 0) {
+                Node* node = agi->fluid_lattice_ai->multiscale_lattice->lattices[0]->nodes[0];
+                memcpy(exp->observations, node->state, exp->num_observations * sizeof(double));
+            }
+        }
+        
+        agi->num_experiences++;
+    }
+}
+
+void agi_learn_from_experience(AGI* agi, Experience* experience) {
+    if (!agi || !experience) return;
+    
+    // Calculate reward based on utility
+    double reward = experience->utility;
+    
+    // Map goal to state
+    int highest_priority_goal = 0;
+    double highest_priority = 0.0;
+    
+    for (int i = 0; i < agi->num_goals; i++) {
+        if (agi->goals[i].priority > highest_priority) {
+            highest_priority = agi->goals[i].priority;
+            highest_priority_goal = i;
+        }
+    }
+    
+    int state = highest_priority_goal % agi->reinforcement_learning->num_states;
+    
+    // Get action
+    int action = 0;
+    if (experience->num_actions > 0) {
+        action = experience->actions[0].id;
+    }
+    
+    // Get next state (simplified - just increment state)
+    int next_state = (state + 1) % agi->reinforcement_learning->num_states;
+    
+    // Update Q-values
+    agi->learning_strategies[0].update(agi->reinforcement_learning, state, action, next_state, reward);
+    
+    // Update fluid lattice with learning
+    if (experience->num_observations > 0) {
+        agi->fluid_lattice_ai->learn(agi->fluid_lattice_ai, experience->observations, experience->num_observations);
+    }
+    
+    // Update metrics
+    agi->consciousness.current_value = agi->calculate_consciousness(agi);
+    agi->spirit_level.current_value = agi->calculate_spirit_level(agi);
+    agi->flow_level.current_value = agi->calculate_flow_level(agi);
+    
+    // Update goals
+    for (int i = 0; i < agi->num_goals; i++) {
+        // Update success metric for the goal based on experience
+        if (experience->utility > 0.5) {
+            agi->goals[i].success_metric += 0.1 * (experience->utility - 0.5);
+        }
+        
+        // Adjust priority based on success
+        if (agi->goals[i].success_metric > 0.8) {
+            // Goal is being achieved, gradually reduce priority
+            agi->goals[i].priority *= 0.9;
+        } else if (agi->goals[i].success_metric < 0.2) {
+            // Goal is not being achieved, increase priority
+            agi->goals[i].priority *= 1.1;
+            if (agi->goals[i].priority > 1.0) {
+                agi->goals[i].priority = 1.0;
+            }
+        }
+    }
+}
+
+void agi_update_knowledge_graph(AGI* agi, Experience* experience) {
+    if (!agi || !experience) return;
+    
+    // Add experience entity to knowledge graph
+    char experience_name[MAX_STRING_LENGTH];
+    snprintf(experience_name, MAX_STRING_LENGTH, "experience_%d", experience->id);
+    knowledge_graph_add_entity(agi->knowledge_graph, experience_name);
+    
+    // Add action entity
+    if (experience->num_actions > 0) {
+        char action_name[MAX_STRING_LENGTH];
+        snprintf(action_name, MAX_STRING_LENGTH, "action_%d", experience->actions[0].id);
+        knowledge_graph_add_entity(agi->knowledge_graph, action_name);
+        
+        // Add relationship between experience and action
+        int experience_idx = knowledge_graph_find_entity(agi->knowledge_graph, experience_name);
+        int action_idx = knowledge_graph_find_entity(agi->knowledge_graph, action_name);
+        
+        if (experience_idx >= 0 && action_idx >= 0) {
+            knowledge_graph_add_link(agi->knowledge_graph, experience_idx, action_idx, 
+                                   experience->utility, "contains_action");
+        }
+    }
+    
+    // Add observation entities and relationships
+    if (experience->observations && experience->num_observations > 0) {
+        char observation_name[MAX_STRING_LENGTH];
+        snprintf(observation_name, MAX_STRING_LENGTH, "observation_%d", experience->id);
+        knowledge_graph_add_entity(agi->knowledge_graph, observation_name);
+        
+        int experience_idx = knowledge_graph_find_entity(agi->knowledge_graph, experience_name);
+        int observation_idx = knowledge_graph_find_entity(agi->knowledge_graph, observation_name);
+        
+        if (experience_idx >= 0 && observation_idx >= 0) {
+            knowledge_graph_add_link(agi->knowledge_graph, experience_idx, observation_idx, 
+                                   1.0, "contains_observation");
+        }
+    }
+    
+    // Add relationships to goals
+    for (int i = 0; i < agi->num_goals; i++) {
+        char goal_name[MAX_STRING_LENGTH];
+        snprintf(goal_name, MAX_STRING_LENGTH, "goal_%d", agi->goals[i].id);
+        knowledge_graph_add_entity(agi->knowledge_graph, goal_name);
+        
+        int experience_idx = knowledge_graph_find_entity(agi->knowledge_graph, experience_name);
+        int goal_idx = knowledge_graph_find_entity(agi->knowledge_graph, goal_name);
+        
+        if (experience_idx >= 0 && goal_idx >= 0) {
+            // Link strength based on how much this experience contributed to the goal
+            double contribution = agi->goals[i].success_metric * experience->utility;
+            knowledge_graph_add_link(agi->knowledge_graph, experience_idx, goal_idx, 
+                                   contribution, "contributes_to_goal");
+        }
+    }
+}
+
+void agi_generate_creative_idea(AGI* agi, char* output, int output_size) {
+    if (!agi || !output || output_size <= 0) return;
+    
+    // Use creative output generation from FluidLatticeAI
+    if (agi->num_patterns > 0) {
+        // Select a pattern as seed
+        int selected_pattern = rand() % agi->num_patterns;
+        
+        // Generate creative output
+        double* creative_output = agi->fluid_lattice_ai->generate_creative_output(
+            agi->fluid_lattice_ai, 
+            agi->patterns[selected_pattern].values, 
+            agi->patterns[selected_pattern].num_values, 
+            10);
+        
+        if (creative_output) {
+            // Convert to textual description (simplified)
+            int output_dims = agi->patterns[selected_pattern].num_values;
+            int chars_written = 0;
+            
+            chars_written += snprintf(output, output_size, "Creative idea based on pattern %s:\n", 
+                                    agi->patterns[selected_pattern].name);
+            
+            // Add some description based on output values
+            chars_written += snprintf(output + chars_written, output_size - chars_written, 
+                                    "This idea combines elements of ");
+            
+            // Classify the output into conceptual categories
+            double sum = 0.0;
+            double max_val = creative_output[0];
+            int max_idx = 0;
+            
+            for (int i = 0; i < output_dims && i < 5; i++) {
+                sum += creative_output[i];
+                if (creative_output[i] > max_val) {
+                    max_val = creative_output[i];
+                    max_idx = i;
+                }
+            }
+            
+            // Add category descriptions based on dominant outputs
+            const char* categories[] = {
+                "fluid dynamics", "pattern formation", "emergent complexity", 
+                "self-organization", "adaptive learning"
+            };
+            
+            for (int i = 0; i < output_dims && i < 5; i++) {
+                if (creative_output[i] > 0.5) {
+                    chars_written += snprintf(output + chars_written, output_size - chars_written, 
+                                           "%s (%.2f), ", categories[i], creative_output[i]);
+                }
+            }
+            
+            chars_written += snprintf(output + chars_written, output_size - chars_written, 
+                                    "\nThe dominant theme is %s with strength %.2f.\n", 
+                                    categories[max_idx], max_val);
+            
+            // Add fractal dimension as complexity measure
+            double fractal_dim = calculate_fractal_dimension(creative_output, output_dims);
+            chars_written += snprintf(output + chars_written, output_size - chars_written, 
+                                    "Complexity measure: %.3f", fractal_dim);
+            
+            free_double_array(creative_output);
+        } else {
+            strncpy(output, "Unable to generate creative idea", output_size - 1);
+            output[output_size - 1] = '\0';
+        }
+    } else {
+        strncpy(output, "Not enough patterns to generate creative ideas", output_size - 1);
+        output[output_size - 1] = '\0';
+    }
+}
+
+double agi_calculate_consciousness(AGI* agi) {
+    if (!agi) return 0.0;
+    
+    // Factors that contribute to consciousness
+    
+    // 1. Pattern diversity (number of different patterns)
+    double pattern_diversity = agi->num_patterns > 0 ? 
+                             (double)agi->num_patterns / MAX_PATTERNS : 0.01;
+    
+    // 2. Knowledge graph complexity (number of links relative to entities)
+    double knowledge_complexity = 0.01;
+    if (agi->knowledge_graph->num_entities > 0) {
+        knowledge_complexity = (double)agi->knowledge_graph->num_links / 
+                             (agi->knowledge_graph->num_entities * 2);
+    }
+    
+    // 3. Goal-directed behavior (number of goals with success metric)
+    double goal_directedness = 0.01;
+    int successful_goals = 0;
+    for (int i = 0; i < agi->num_goals; i++) {
+        if (agi->goals[i].success_metric > 0.5) {
+            successful_goals++;
+        }
+    }
+    
+    if (agi->num_goals > 0) {
+        goal_directedness = (double)successful_goals / agi->num_goals;
+    }
+    
+    // 4. Learning progress (based on reinforcement learning average Q-values)
+    double learning_progress = 0.01;
+    double sum_q_values = 0.0;
+    int count = 0;
+    
+    for (int s = 0; s < agi->reinforcement_learning->num_states; s++) {
+        for (int a = 0; a < agi->reinforcement_learning->num_actions; a++) {
+            sum_q_values += agi->reinforcement_learning->q_values[s][a];
+            count++;
+        }
+    }
+    
+    if (count > 0) {
+        learning_progress = sum_q_values / count;
+        learning_progress = learning_progress > 1.0 ? 1.0 : learning_progress;
+        learning_progress = learning_progress < 0.0 ? 0.0 : learning_progress;
+    }
+    
+    // 5. Fluid lattice dynamism (average total dynamism of nodes)
+    double fluid_dynamism = 0.01;
+    double sum_dynamism = 0.0;
+    int num_nodes = 0;
+    
+    Lattice* lattice = agi->fluid_lattice_ai->multiscale_lattice->lattices[0];
+    for (int i = 0; i < lattice->total_nodes; i++) {
+        sum_dynamism += lattice->nodes[i]->total_dynamism;
+        num_nodes++;
+    }
+    
+    if (num_nodes > 0) {
+        fluid_dynamism = sum_dynamism / num_nodes;
+    }
+    
+    // Weighted combination of factors
+    double consciousness = (pattern_diversity * 0.2) + 
+                         (knowledge_complexity * 0.2) +
+                         (goal_directedness * 0.2) +
+                         (learning_progress * 0.2) +
+                         (fluid_dynamism * 0.2);
+    
+    // Sigmoid function to model emergence of consciousness
+    consciousness = 1.0 / (1.0 + exp(-10.0 * (consciousness - 0.5)));
+    
+    return consciousness;
+}
+
+double agi_calculate_spirit_level(AGI* agi) {
+    if (!agi) return 0.0;
+    
+    // Factors that contribute to spirit level
+    
+    // 1. Curiosity (exploration rate in reinforcement learning)
+    double curiosity = agi->reinforcement_learning->exploration_rate;
+    
+    // 2. Creativity (based on pattern confidence and diversity)
+    double creativity = 0.01;
+    double sum_confidence = 0.0;
+    for (int i = 0; i < agi->num_patterns; i++) {
+        sum_confidence += agi->patterns[i].confidence;
+    }
+    
+    if (agi->num_patterns > 0) {
+        creativity = sum_confidence / agi->num_patterns;
+    }
+    
+    // 3. Resilience (based on flow level stability)
+    double resilience = 0.5;
+    if (agi->flow_level.history_size > 1) {
+        double sum_diff = 0.0;
+        for (int i = 1; i < agi->flow_level.history_size; i++) {
+            sum_diff += fabs(agi->flow_level.recent_history[i] - agi->flow_level.recent_history[i-1]);
+        }
+        
+        double avg_diff = sum_diff / (agi->flow_level.history_size - 1);
+        resilience = 1.0 - avg_diff; // Less change = more stability = more resilience
+        
+        if (resilience < 0.0) resilience = 0.0;
+        if (resilience > 1.0) resilience = 1.0;
+    }
+    
+    // 4. Social harmony (placeholder - would depend on interactions with other agents)
+    double social_harmony = 0.5;
+    
+    // 5. Adaptability (based on fluid lattice adaptability)
+    double adaptability = agi->fluid_lattice_ai->multiscale_lattice->lattices[0]->nodes[0]->adaptability;
+    
+    // Weighted combination of factors
+    double spirit_level = (curiosity * 0.2) + 
+                        (creativity * 0.2) +
+                        (resilience * 0.2) +
+                        (social_harmony * 0.2) +
+                        (adaptability * 0.2);
+    
+    // Apply a saturation function
+    spirit_level = 2.0 / (1.0 + exp(-5.0 * spirit_level)) - 1.0;
+    
+    return spirit_level;
+}
+
+double agi_calculate_flow_level(AGI* agi) {
+    if (!agi) return 0.0;
+    
+    // Factors that contribute to flow level
+    
+    // 1. Skill-challenge balance (ratio of success to goal priority)
+    double skill_challenge_balance = 0.5;
+    double sum_success = 0.0;
+    double sum_priority = 0.0;
+    
+    for (int i = 0; i < agi->num_goals; i++) {
+        sum_success += agi->goals[i].success_metric;
+        sum_priority += agi->goals[i].priority;
+    }
+    
+    if (sum_priority > 0.0) {
+        skill_challenge_balance = sum_success / sum_priority;
+        
+        // Optimal flow happens when skills match challenges (ratio near 1.0)
+        // Convert to 0-1 scale centered around 1.0
+        skill_challenge_balance = 1.0 - fabs(skill_challenge_balance - 1.0);
+        
+        if (skill_challenge_balance < 0.0) skill_challenge_balance = 0.0;
+    }
+    
+    // 2. Engagement (based on recent consciousness trends)
+    double engagement = 0.5;
+    if (agi->consciousness.history_size > 5) {
+        double recent_avg = 0.0;
+        for (int i = agi->consciousness.history_size - 5; i < agi->consciousness.history_size; i++) {
+            recent_avg += agi->consciousness.recent_history[i];
+        }
+        recent_avg /= 5.0;
+        
+        // Moderate consciousness is good for flow (not too high or low)
+        engagement = 1.0 - fabs(recent_avg - 0.5) * 2.0;
+        
+        if (engagement < 0.0) engagement = 0.0;
+    }
+    
+    // 3. Temporal focus (consistency of attention over time)
+    double temporal_focus = 0.5;
+    
+    // 4. Immersion (based on continuity of action-observation cycles)
+    double immersion = (double)agi->num_experiences / MAX_ARRAY_LENGTH;
+    
+    // 5. Clarity (based on pattern confidence)
+    double clarity = 0.01;
+    double sum_confidence = 0.0;
+    for (int i = 0; i < agi->num_patterns; i++) {
+        sum_confidence += agi->patterns[i].confidence;
+    }
+    
+    if (agi->num_patterns > 0) {
+        clarity = sum_confidence / agi->num_patterns;
+    }
+    
+    // Weighted combination of factors
+    double flow_level = (skill_challenge_balance * 0.3) + 
+                      (engagement * 0.2) +
+                      (temporal_focus * 0.2) +
+                      (immersion * 0.2) +
+                      (clarity * 0.1);
+    
+    // Apply a sigmoid function to model flow state transition
+    flow_level = 1.0 / (1.0 + exp(-15.0 * (flow_level - 0.6)));
+    
+    return flow_level;
+}
+
+// Main function with a simple AGI demonstration
+int main() {
+    // Seed random number generator
+    srand((unsigned int)time(NULL));
+    
+    printf("Initializing Integrated AGI System...\n");
+    
+    // Create and initialize AGI
+    AGI* agi = create_agi();
+    agi->initialize(agi);
+    
+    printf("AGI System initialized successfully.\n");
+    printf("Starting simulation...\n\n");
+    
+    // Simulation parameters
+    int num_simulation_steps = 100;
+    int input_dimensions = 5;
+    
+    // Run simulation
+    for (int step = 0; step < num_simulation_steps; step++) {
+        printf("Simulation step %d/%d\n", step + 1, num_simulation_steps);
+        
+        // Generate random input data (in a real system, this would come from sensors)
+        double* input_data = create_double_array(input_dimensions);
+        for (int i = 0; i < input_dimensions; i++) {
+            input_data[i] = random_uniform();
+        }
+        
+        // Perceive environment
+        agi->perceive_environment(agi, input_data, input_dimensions);
+        printf("  Perceived environment with %d sensor inputs\n", input_dimensions);
+        
+        // Process observations
+        agi->process_observations(agi);
+        printf("  Processed observations, detected %d patterns\n", agi->num_patterns);
+        
+        // Monitor internal state
+        agi->monitor_internal_state(agi);
+        printf("  Internal metrics: Consciousness=%.3f, Spirit=%.3f, Flow=%.3f\n", 
+             agi->consciousness.current_value, agi->spirit_level.current_value, agi->flow_level.current_value);
+        
+        // Select and execute action
+        Action action;
+        agi->select_action(agi, &action);
+        agi->execute_action(agi, &action);
+        printf("  Selected and executed action: %s\n", action.description);
+        
+        // Learn from most recent experience
+        if (agi->num_experiences > 0) {
+            agi->learn_from_experience(agi, &agi->experiences[agi->num_experiences - 1]);
+            agi->update_knowledge_graph(agi, &agi->experiences[agi->num_experiences - 1]);
+            printf("  Learned from experience and updated knowledge graph\n");
+        }
+        
+        // Generate creative idea every 10 steps
+        if (step % 10 == 0 && step > 0) {
+            char idea[1024];
+            agi->generate_creative_idea(agi, idea, sizeof(idea));
+            printf("\n=== Creative Idea ===\n%s\n===================\n\n", idea);
+        }
+        
+        // Free resources
+        free_double_array(input_data);
+        if (action.parameters) {
+            free_double_array(action.parameters);
+        }
+        
+        printf("\n");
+    }
+    
+    // Display final state
+    printf("Simulation completed.\n");
+    printf("Final state:\n");
+    printf("  Number of patterns: %d\n", agi->num_patterns);
+    printf("  Number of experiences: %d\n", agi->num_experiences);
+    printf("  Knowledge graph: %d entities, %d links\n", 
+         agi->knowledge_graph->num_entities, agi->knowledge_graph->num_links);
+    printf("  Goals: %d active goals\n", agi->num_goals);
+    printf("  Metrics: Consciousness=%.3f, Spirit=%.3f, Flow=%.3f\n", 
+         agi->consciousness.current_value, agi->spirit_level.current_value, agi->flow_level.current_value);
+    
+    // Clean up
+    free_agi(agi);
+    
+    printf("AGI System terminated successfully.\n");
+    
+    return 0;
+}
+
+/* ===============================
+ * Extended Pattern Recognition Algorithms
+ * for Specific Domains
+ * =============================== */
+
+// Vision Domain Pattern Recognition
+typedef struct {
+    double* features;
+    int num_features;
+    double* color_histogram;
+    int histogram_bins;
+    double* edge_map;
+    int edge_map_size;
+    double* texture_features;
+    int num_texture_features;
+    double* shape_descriptors;
+    int num_shape_descriptors;
+} VisionPattern;
+
+// Audio Domain Pattern Recognition
+typedef struct {
+    double* waveform;
+    int waveform_length;
+    double* spectrum;
+    int spectrum_size;
+    double* mfcc;
+    int num_mfcc;
+    double* onset_features;
+    int num_onset_features;
+    double* rhythm_features;
+    int num_rhythm_features;
+} AudioPattern;
+
+// Text Domain Pattern Recognition
+typedef struct {
+    char** tokens;
+    int num_tokens;
+    double* word_embeddings;
+    int embedding_dim;
+    double* ngram_frequencies;
+    int num_ngrams;
+    double* syntactic_features;
+    int num_syntactic_features;
+    double* semantic_features;
+    int num_semantic_features;
+} TextPattern;
+
+// Time Series Domain Pattern Recognition
+typedef struct {
+    double* values;
+    int length;
+    double* spectral_density;
+    int spectral_size;
+    double* wavelet_coefficients;
+    int num_wavelet_coeffs;
+    double* statistical_features;
+    int num_statistical_features;
+    double* complexity_measures;
+    int num_complexity_measures;
+} TimeSeriesPattern;
+
+// Domain-Specific Pattern Analysis Functions Prototypes
+VisionPattern* analyze_vision_pattern(double* image_data, int width, int height, int channels);
+AudioPattern* analyze_audio_pattern(double* audio_data, int length, int sample_rate);
+TextPattern* analyze_text_pattern(const char* text, int text_length);
+TimeSeriesPattern* analyze_time_series_pattern(double* time_series, int length, double sampling_rate);
+
+void free_vision_pattern(VisionPattern* pattern);
+void free_audio_pattern(AudioPattern* pattern);
+void free_text_pattern(TextPattern* pattern);
+void free_time_series_pattern(TimeSeriesPattern* pattern);
+
+// Topological Data Analysis
+typedef struct {
+    double* persistence_diagram;
+    int diagram_size;
+    double* betti_numbers;
+    int num_betti_numbers;
+    double* persistence_landscape;
+    int landscape_size;
+} TopologicalFeatures;
+
+TopologicalFeatures* compute_topological_features(double* data, int data_size, int dimensions, double max_radius);
+void free_topological_features(TopologicalFeatures* features);
+
+// Neuromorphic Pattern Analysis
+typedef struct {
+    double* spike_train;
+    int spike_train_length;
+    double* inter_spike_intervals;
+    int num_intervals;
+    double* phase_synchronization;
+    int sync_measurements;
+    double synchrony_index;
+    double* neural_complexity;
+    int complexity_dimensions;
+} NeuromorphicFeatures;
+
+NeuromorphicFeatures* compute_neuromorphic_features(double* time_series, int length, double threshold);
+void free_neuromorphic_features(NeuromorphicFeatures* features);
+
+// Quantum-Inspired Pattern Analysis
+typedef struct {
+    double* quantum_states;
+    int num_states;
+    double* quantum_correlations;
+    int num_correlations;
+    double* entanglement_measures;
+    int num_entanglement_measures;
+    double* quantum_walk_probabilities;
+    int walk_size;
+} QuantumInspiredFeatures;
+
+QuantumInspiredFeatures* compute_quantum_inspired_features(double* data, int data_size, int hilbert_space_dim);
+void free_quantum_inspired_features(QuantumInspiredFeatures* features);
+
+/* ===============================
+ * Implementation of Extended Pattern Recognition Algorithms
+ * =============================== */
+
+// Function to compute Gabor filter response
+double* compute_gabor_filter(double* image, int width, int height, double orientation, double frequency, double sigma_x, double sigma_y) {
+    double* response = (double*)malloc(width * height * sizeof(double));
+    if (!response) {
+        fprintf(stderr, "Failed to allocate memory for Gabor filter response\n");
+        return NULL;
+    }
+    
+    // Initialize response to zero
+    memset(response, 0, width * height * sizeof(double));
+    
+    // Half sizes of the filter kernel
+    int half_width = (int)(3 * sigma_x);
+    int half_height = (int)(3 * sigma_y);
+    
+    // Apply the filter
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            double sum = 0.0;
+            double norm_factor = 0.0;
+            
+            for (int ky = -half_height; ky <= half_height; ky++) {
+                for (int kx = -half_width; kx <= half_width; kx++) {
+                    // Gabor function
+                    double x_theta = kx * cos(orientation) + ky * sin(orientation);
+                    double y_theta = -kx * sin(orientation) + ky * cos(orientation);
+                    
+                    double gabor_value = exp(-0.5 * (x_theta*x_theta/(sigma_x*sigma_x) + 
+                                                    y_theta*y_theta/(sigma_y*sigma_y))) * 
+                                        cos(2 * M_PI * frequency * x_theta);
+                    
+                    // Coordinates of image pixel to process
+                    int ix = x + kx;
+                    int iy = y + ky;
+                    
+                    // Check if coordinates are within image bounds
+                    if (ix >= 0 && ix < width && iy >= 0 && iy < height) {
+                        sum += gabor_value * image[iy * width + ix];
+                        norm_factor += gabor_value;
+                    }
+                }
+            }
+            
+            if (norm_factor != 0.0) {
+                response[y * width + x] = sum / norm_factor;
+            }
+        }
+    }
+    
+    return response;
+}
+
+// Function to compute Local Binary Pattern
+double* compute_lbp(double* image, int width, int height) {
+    double* lbp = (double*)malloc(width * height * sizeof(double));
+    if (!lbp) {
+        fprintf(stderr, "Failed to allocate memory for LBP\n");
+        return NULL;
+    }
+    
+    // Initialize LBP to zero
+    memset(lbp, 0, width * height * sizeof(double));
+    
+    // Compute LBP for each pixel (excluding borders)
+    for (int y = 1; y < height - 1; y++) {
+        for (int x = 1; x < width - 1; x++) {
+            unsigned char code = 0;
+            double center = image[y * width + x];
+            
+            // Compare center pixel with 8 neighbors
+            code |= (image[(y-1) * width + (x-1)] >= center) << 7;
+            code |= (image[(y-1) * width + x] >= center) << 6;
+            code |= (image[(y-1) * width + (x+1)] >= center) << 5;
+            code |= (image[y * width + (x+1)] >= center) << 4;
+            code |= (image[(y+1) * width + (x+1)] >= center) << 3;
+            code |= (image[(y+1) * width + x] >= center) << 2;
+            code |= (image[(y+1) * width + (x-1)] >= center) << 1;
+            code |= (image[y * width + (x-1)] >= center);
+            
+            lbp[y * width + x] = (double)code;
+        }
+    }
+    
+    return lbp;
+}
+
+// Function to compute color histogram
+double* compute_color_histogram(double* image, int width, int height, int channels, int bins_per_channel) {
+    if (channels != 3) {
+        fprintf(stderr, "Color histogram requires a 3-channel image\n");
+        return NULL;
+    }
+    
+    int total_bins = bins_per_channel * bins_per_channel * bins_per_channel;
+    double* histogram = (double*)malloc(total_bins * sizeof(double));
+    if (!histogram) {
+        fprintf(stderr, "Failed to allocate memory for color histogram\n");
+        return NULL;
+    }
+    
+    // Initialize histogram to zero
+    memset(histogram, 0, total_bins * sizeof(double));
+    
+    // Compute histogram
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int pixel_idx = (y * width + x) * channels;
+            
+            // Quantize each channel
+            int r_bin = (int)(image[pixel_idx] * bins_per_channel);
+            int g_bin = (int)(image[pixel_idx + 1] * bins_per_channel);
+            int b_bin = (int)(image[pixel_idx + 2] * bins_per_channel);
+            
+            // Clamp to range
+            if (r_bin >= bins_per_channel) r_bin = bins_per_channel - 1;
+            if (g_bin >= bins_per_channel) g_bin = bins_per_channel - 1;
+            if (b_bin >= bins_per_channel) b_bin = bins_per_channel - 1;
+            
+            // Compute bin index
+            int bin_idx = r_bin * bins_per_channel * bins_per_channel + g_bin * bins_per_channel + b_bin;
+            
+            // Increment histogram bin
+            histogram[bin_idx]++;
+        }
+    }
+    
+    // Normalize histogram
+    double normalizer = 1.0 / (width * height);
+    for (int i = 0; i < total_bins; i++) {
+        histogram[i] *= normalizer;
+    }
+    
+    return histogram;
+}
+
+// Function to detect edges using Canny-inspired algorithm
+double* detect_edges(double* image, int width, int height, double low_threshold, double high_threshold) {
+    // Allocate memory for edge map
+    double* edge_map = (double*)malloc(width * height * sizeof(double));
+    if (!edge_map) {
+        fprintf(stderr, "Failed to allocate memory for edge map\n");
+        return NULL;
+    }
+    
+    // Allocate memory for gradient magnitude and direction
+    double* gradient_magnitude = (double*)malloc(width * height * sizeof(double));
+    double* gradient_direction = (double*)malloc(width * height * sizeof(double));
+    
+    if (!gradient_magnitude || !gradient_direction) {
+        fprintf(stderr, "Failed to allocate memory for gradient\n");
+        free(edge_map);
+        if (gradient_magnitude) free(gradient_magnitude);
+        if (gradient_direction) free(gradient_direction);
+        return NULL;
+    }
+    
+    // Initialize edge map to zero
+    memset(edge_map, 0, width * height * sizeof(double));
+    
+    // Compute gradient using Sobel operator
+    for (int y = 1; y < height - 1; y++) {
+        for (int x = 1; x < width - 1; x++) {
+            // Sobel kernels
+            double gx = image[(y-1)*width + (x+1)] + 2*image[y*width + (x+1)] + image[(y+1)*width + (x+1)] -
+                        image[(y-1)*width + (x-1)] - 2*image[y*width + (x-1)] - image[(y+1)*width + (x-1)];
+            
+            double gy = image[(y-1)*width + (x-1)] + 2*image[(y-1)*width + x] + image[(y-1)*width + (x+1)] -
+                        image[(y+1)*width + (x-1)] - 2*image[(y+1)*width + x] - image[(y+1)*width + (x+1)];
+            
+            // Compute gradient magnitude and direction
+            gradient_magnitude[y*width + x] = sqrt(gx*gx + gy*gy);
+            gradient_direction[y*width + x] = atan2(gy, gx);
+        }
+    }
+    
+    // Non-maximum suppression
+    for (int y = 1; y < height - 1; y++) {
+        for (int x = 1; x < width - 1; x++) {
+            double direction = gradient_direction[y*width + x];
+            double magnitude = gradient_magnitude[y*width + x];
+            
+            // Normalize direction to 0-180 degrees
+            if (direction < 0) direction += M_PI;
+            
+            // Find neighboring pixels in gradient direction
+            double neighbor1, neighbor2;
+            
+            if ((direction >= 0 && direction < M_PI/8) || (direction >= 7*M_PI/8 && direction <= M_PI)) {
+                // 0 or 180 degrees
+                neighbor1 = gradient_magnitude[y*width + (x+1)];
+                neighbor2 = gradient_magnitude[y*width + (x-1)];
+            } else if (direction >= M_PI/8 && direction < 3*M_PI/8) {
+                // 45 degrees
+                neighbor1 = gradient_magnitude[(y-1)*width + (x+1)];
+                neighbor2 = gradient_magnitude[(y+1)*width + (x-1)];
+            } else if (direction >= 3*M_PI/8 && direction < 5*M_PI/8) {
+                // 90 degrees
+                neighbor1 = gradient_magnitude[(y-1)*width + x];
+                neighbor2 = gradient_magnitude[(y+1)*width + x];
+            } else {
+                // 135 degrees
+                neighbor1 = gradient_magnitude[(y-1)*width + (x-1)];
+                neighbor2 = gradient_magnitude[(y+1)*width + (x+1)];
+            }
+            
+            // Suppress non-maximum values
+            if (magnitude >= neighbor1 && magnitude >= neighbor2) {
+                edge_map[y*width + x] = magnitude;
+            } else {
+                edge_map[y*width + x] = 0;
+            }
+        }
+    }
+    
+    // Hysteresis thresholding
+    for (int y = 1; y < height - 1; y++) {
+        for (int x = 1; x < width - 1; x++) {
+            if (edge_map[y*width + x] >= high_threshold) {
+                // Strong edge
+                edge_map[y*width + x] = 1.0;
+            } else if (edge_map[y*width + x] >= low_threshold) {
+                // Weak edge, check if connected to strong edge
+                bool connected_to_strong = false;
+                
+                // Check 8-connected neighbors
+                for (int ny = -1; ny <= 1; ny++) {
+                    for (int nx = -1; nx <= 1; nx++) {
+                        if (nx == 0 && ny == 0) continue;
+                        
+                        if (edge_map[(y+ny)*width + (x+nx)] >= high_threshold) {
+                            connected_to_strong = true;
+                            break;
+                        }
+                    }
+                    if (connected_to_strong) break;
+                }
+                
+                edge_map[y*width + x] = connected_to_strong ? 1.0 : 0.0;
+            } else {
+                // Non-edge
+                edge_map[y*width + x] = 0.0;
+            }
+        }
+    }
+    
+    // Clean up
+    free(gradient_magnitude);
+    free(gradient_direction);
+    
+    return edge_map;
+}
+
+VisionPattern* analyze_vision_pattern(double* image_data, int width, int height, int channels) {
+    if (!image_data || width <= 0 || height <= 0 || channels <= 0) {
+        fprintf(stderr, "Invalid image data\n");
+        return NULL;
+    }
+    
+    VisionPattern* pattern = (VisionPattern*)malloc(sizeof(VisionPattern));
+    if (!pattern) {
+        fprintf(stderr, "Failed to allocate memory for vision pattern\n");
+        return NULL;
+    }
+    
+    // Initialize pattern
+    memset(pattern, 0, sizeof(VisionPattern));
+    
+    // Convert to grayscale if it's a color image
+    double* grayscale_image = NULL;
+    if (channels == 1) {
+        // Already grayscale, just make a copy
+        grayscale_image = (double*)malloc(width * height * sizeof(double));
+        if (!grayscale_image) {
+            fprintf(stderr, "Failed to allocate memory for grayscale image\n");
+            free(pattern);
+            return NULL;
+        }
+        memcpy(grayscale_image, image_data, width * height * sizeof(double));
+    } else if (channels == 3) {
+        // Convert RGB to grayscale
+        grayscale_image = (double*)malloc(width * height * sizeof(double));
+        if (!grayscale_image) {
+            fprintf(stderr, "Failed to allocate memory for grayscale image\n");
+            free(pattern);
+            return NULL;
+        }
+        
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel_idx = (y * width + x) * channels;
+                double r = image_data[pixel_idx];
+                double g = image_data[pixel_idx + 1];
+                double b = image_data[pixel_idx + 2];
+                grayscale_image[y * width + x] = 0.299 * r + 0.587 * g + 0.114 * b;
+            }
+        }
+    } else {
+        fprintf(stderr, "Unsupported number of channels: %d\n", channels);
+        free(pattern);
+        return NULL;
+    }
+    
+    // Compute color histogram (if color image)
+    if (channels == 3) {
+        pattern->histogram_bins = 8; // 8 bins per channel
+        pattern->color_histogram = compute_color_histogram(image_data, width, height, channels, pattern->histogram_bins);
+    }
+    
+    // Compute edge map
+    pattern->edge_map_size = width * height;
+    pattern->edge_map = detect_edges(grayscale_image, width, height, 0.1, 0.3);
+    
+    // Compute texture features using Local Binary Patterns
+    double* lbp = compute_lbp(grayscale_image, width, height);
+    
+    // Compute histogram of LBP values as texture features
+    pattern->num_texture_features = 256; // 256 possible LBP values
+    pattern->texture_features = (double*)calloc(pattern->num_texture_features, sizeof(double));
+    
+    if (pattern->texture_features && lbp) {
+        for (int y = 1; y < height - 1; y++) {
+            for (int x = 1; x < width - 1; x++) {
+                int bin = (int)lbp[y * width + x];
+                if (bin >= 0 && bin < pattern->num_texture_features) {
+                    pattern->texture_features[bin]++;
+                }
+            }
+        }
+        
+        // Normalize texture features
+        double normalizer = 1.0 / ((height - 2) * (width - 2));
+        for (int i = 0; i < pattern->num_texture_features; i++) {
+            pattern->texture_features[i] *= normalizer;
+        }
+    }
+    
+    // Compute shape descriptors (simplified Hu moments)
+    pattern->num_shape_descriptors = 7; // 7 Hu moments
+    pattern->shape_descriptors = (double*)malloc(pattern->num_shape_descriptors * sizeof(double));
+    
+    if (pattern->shape_descriptors) {
+        // Compute central moments
+        double m00 = 0.0, m10 = 0.0, m01 = 0.0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                double pixel_value = grayscale_image[y * width + x];
+                m00 += pixel_value; // Zero-order moment (total mass)
+                m10 += x * pixel_value; // First-order moment in x
+                m01 += y * pixel_value; // First-order moment in y
+            }
+        }
+        
+        // Compute centroid
+        double x_centroid = m10 / m00;
+        double y_centroid = m01 / m00;
+        
+        // Compute central moments
+        double mu20 = 0.0, mu02 = 0.0, mu11 = 0.0, mu30 = 0.0, mu03 = 0.0, mu12 = 0.0, mu21 = 0.0;
+        
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                double pixel_value = grayscale_image[y * width + x];
+                double dx = x - x_centroid;
+                double dy = y - y_centroid;
+                
+                mu20 += dx * dx * pixel_value;
+                mu02 += dy * dy * pixel_value;
+                mu11 += dx * dy * pixel_value;
+                mu30 += dx * dx * dx * pixel_value;
+                mu03 += dy * dy * dy * pixel_value;
+                mu12 += dx * dy * dy * pixel_value;
+                mu21 += dx * dx * dy * pixel_value;
+            }
+        }
+        
+        // Normalize central moments
+        double inv_m00 = 1.0 / m00;
+        mu20 *= inv_m00;
+        mu02 *= inv_m00;
+        mu11 *= inv_m00;
+        mu30 *= inv_m00 * sqrt(inv_m00);
+        mu03 *= inv_m00 * sqrt(inv_m00);
+        mu12 *= inv_m00 * sqrt(inv_m00);
+        mu21 *= inv_m00 * sqrt(inv_m00);
+        
+        // Compute Hu moments
+        double h1 = mu20 + mu02;
+        double h2 = (mu20 - mu02) * (mu20 - mu02) + 4 * mu11 * mu11;
+        double h3 = (mu30 - 3 * mu12) * (mu30 - 3 * mu12) + (3 * mu21 - mu03) * (3 * mu21 - mu03);
+        double h4 = (mu30 + mu12) * (mu30 + mu12) + (mu21 + mu03) * (mu21 + mu03);
+        double h5 = (mu30 - 3 * mu12) * (mu30 + mu12) * ((mu30 + mu12) * (mu30 + mu12) - 3 * (mu21 + mu03) * (mu21 + mu03))
+                  + (3 * mu21 - mu03) * (mu21 + mu03) * (3 * (mu30 + mu12) * (mu30 + mu12) - (mu21 + mu03) * (mu21 + mu03));
+        double h6 = (mu20 - mu02) * ((mu30 + mu12) * (mu30 + mu12) - (mu21 + mu03) * (mu21 + mu03))
+                  + 4 * mu11 * (mu30 + mu12) * (mu21 + mu03);
+        double h7 = (3 * mu21 - mu03) * (mu30 + mu12) * ((mu30 + mu12) * (mu30 + mu12) - 3 * (mu21 + mu03) * (mu21 + mu03))
+                  - (mu30 - 3 * mu12) * (mu21 + mu03) * (3 * (mu30 + mu12) * (mu30 + mu12) - (mu21 + mu03) * (mu21 + mu03));
+        
+        // Log-transform Hu moments for better numerical stability
+        pattern->shape_descriptors[0] = h1 > 0 ? -log(h1) : 0;
+        pattern->shape_descriptors[1] = h2 > 0 ? -log(h2) : 0;
+        pattern->shape_descriptors[2] = h3 > 0 ? -log(h3) : 0;
+        pattern->shape_descriptors[3] = h4 > 0 ? -log(h4) : 0;
+        pattern->shape_descriptors[4] = h5 != 0 ? -log(fabs(h5)) : 0;
+        pattern->shape_descriptors[5] = h6 != 0 ? -log(fabs(h6)) : 0;
+        pattern->shape_descriptors[6] = h7 != 0 ? -log(fabs(h7)) : 0;
+    }
+    
+    // Set up feature vector as a concatenation of all computed features
+    int total_features = 0;
+    if (pattern->color_histogram) total_features += pattern->histogram_bins * pattern->histogram_bins * pattern->histogram_bins;
+    if (pattern->edge_map) total_features += 8; // We'll compute 8 edge statistics
+    if (pattern->texture_features) total_features += pattern->num_texture_features;
+    if (pattern->shape_descriptors) total_features += pattern->num_shape_descriptors;
+    
+    pattern->num_features = total_features;
+    pattern->features = (double*)malloc(total_features * sizeof(double));
+    
+    if (pattern->features) {
+        int feature_idx = 0;
+        
+        // Add color histogram features
+        if (pattern->color_histogram) {
+            int num_histogram_bins = pattern->histogram_bins * pattern->histogram_bins * pattern->histogram_bins;
+            memcpy(pattern->features + feature_idx, pattern->color_histogram, num_histogram_bins * sizeof(double));
+            feature_idx += num_histogram_bins;
+        }
+        
+        // Add edge map statistics
+        if (pattern->edge_map) {
+            // Compute edge statistics (count, mean position, standard deviation, etc.)
+            double edge_count = 0.0;
+            double edge_sum_x = 0.0, edge_sum_y = 0.0;
+            double edge_sum_xx = 0.0, edge_sum_yy = 0.0;
+            
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    double edge_value = pattern->edge_map[y * width + x];
+                    if (edge_value > 0.0) {
+                        edge_count++;
+                        edge_sum_x += x;
+                        edge_sum_y += y;
+                        edge_sum_xx += x * x;
+                        edge_sum_yy += y * y;
+                    }
+                }
+            }
+            
+            double edge_density = edge_count / (width * height);
+            double edge_mean_x = edge_count > 0 ? edge_sum_x / edge_count : 0;
+            double edge_mean_y = edge_count > 0 ? edge_sum_y / edge_count : 0;
+            double edge_std_x = edge_count > 0 ? sqrt((edge_sum_xx / edge_count) - (edge_mean_x * edge_mean_x)) : 0;
+            double edge_std_y = edge_count > 0 ? sqrt((edge_sum_yy / edge_count) - (edge_mean_y * edge_mean_y)) : 0;
+            
+            // Compute edge orientations histogram (4 bins)
+            double edge_orientations[4] = {0};
+            
+            for (int y = 1; y < height - 1; y++) {
+                for (int x = 1; x < width - 1; x++) {
+                    if (pattern->edge_map[y * width + x] > 0.0) {
+                        // Compute gradient
+                        double gx = grayscale_image[y*width + (x+1)] - grayscale_image[y*width + (x-1)];
+                        double gy = grayscale_image[(y+1)*width + x] - grayscale_image[(y-1)*width + x];
+                        
+                        // Compute orientation
+                        double orientation = atan2(gy, gx);
+                        if (orientation < 0) orientation += M_PI;
+                        
+                        // Quantize orientation to 4 bins
+                        int bin = (int)(4 * orientation / M_PI);
+                        if (bin >= 4) bin = 3;
+                        
+                        edge_orientations[bin]++;
+                    }
+                }
+            }
+            
+            // Normalize edge orientations
+            if (edge_count > 0) {
+                for (int i = 0; i < 4; i++) {
+                    edge_orientations[i] /= edge_count;
+                }
+            }
+            
+            // Add edge statistics to feature vector
+            pattern->features[feature_idx++] = edge_density;
+            pattern->features[feature_idx++] = edge_mean_x / width; // Normalize
+            pattern->features[feature_idx++] = edge_mean_y / height; // Normalize
+            pattern->features[feature_idx++] = edge_std_x / width; // Normalize
+            pattern->features[feature_idx++] = edge_std_y / height; // Normalize
+            
+            // Add edge orientation histogram
+            for (int i = 0; i < 3; i++) { // Only need 3, the 4th is redundant
+                pattern->features[feature_idx++] = edge_orientations[i];
+            }
+        }
+        
+        // Add texture features
+        if (pattern->texture_features) {
+            memcpy(pattern->features + feature_idx, pattern->texture_features, pattern->num_texture_features * sizeof(double));
+            feature_idx += pattern->num_texture_features;
+        }
+        
+        // Add shape descriptors
+        if (pattern->shape_descriptors) {
+            memcpy(pattern->features + feature_idx, pattern->shape_descriptors, pattern->num_shape_descriptors * sizeof(double));
+            feature_idx += pattern->num_shape_descriptors;
+        }
+    }
+    
+    // Clean up
+    free(grayscale_image);
+    free(lbp);
+    
+    return pattern;
+}
+
+// Function to free vision pattern memory
+void free_vision_pattern(VisionPattern* pattern) {
+    if (!pattern) return;
+    
+    free(pattern->features);
+    free(pattern->color_histogram);
+    free(pattern->edge_map);
+    free(pattern->texture_features);
+    free(pattern->shape_descriptors);
+    free(pattern);
+}
+
+// Function to compute Short-Time Fourier Transform (STFT)
+double** compute_stft(double* audio_data, int length, int window_size, int hop_size, int* num_frames, int* num_bins) {
+    if (!audio_data || length <= 0 || window_size <= 0 || hop_size <= 0) {
+        fprintf(stderr, "Invalid parameters for STFT\n");
+        return NULL;
+    }
+    
+    // Calculate number of frames
+    *num_frames = 1 + (length - window_size) / hop_size;
+    if (*num_frames <= 0) {
+        fprintf(stderr, "Window size too large for audio length\n");
+        return NULL;
+    }
+    
+    // Number of frequency bins (window_size/2 + 1 for real-valued signal)
+    *num_bins = window_size / 2 + 1;
+    
+    // Allocate memory for STFT result
+    double** stft = (double**)malloc(*num_frames * sizeof(double*));
+    if (!stft) {
+        fprintf(stderr, "Failed to allocate memory for STFT\n");
+        return NULL;
+    }
+    
+    for (int i = 0; i < *num_frames; i++) {
+        stft[i] = (double*)malloc(*num_bins * sizeof(double));
+        if (!stft[i]) {
+            fprintf(stderr, "Failed to allocate memory for STFT frame\n");
+            // Free already allocated memory
+            for (int j = 0; j < i; j++) {
+                free(stft[j]);
+            }
+            free(stft);
+            return NULL;
+        }
+    }
+    
+    // Create Hanning window
+    double* window = (double*)malloc(window_size * sizeof(double));
+    if (!window) {
+        fprintf(stderr, "Failed to allocate memory for window function\n");
+        for (int i = 0; i < *num_frames; i++) {
+            free(stft[i]);
+        }
+        free(stft);
+        return NULL;
+    }
+    
+    for (int i = 0; i < window_size; i++) {
+        window[i] = 0.5 * (1 - cos(2 * M_PI * i / (window_size - 1)));
+    }
+    
+    // Allocate memory for FFT input/output
+    double* fft_input = (double*)malloc(2 * window_size * sizeof(double)); // Real and imaginary parts
+    if (!fft_input) {
+        fprintf(stderr, "Failed to allocate memory for FFT input\n");
+        free(window);
+        for (int i = 0; i < *num_frames; i++) {
+            free(stft[i]);
+        }
+        free(stft);
+        return NULL;
+    }
+    
+    // Process each frame
+    for (int frame = 0; frame < *num_frames; frame++) {
+        int frame_start = frame * hop_size;
+        
+        // Apply window function and prepare FFT input
+        for (int i = 0; i < window_size; i++) {
+            if (frame_start + i < length) {
+                fft_input[2*i] = audio_data[frame_start + i] * window[i]; // Real part
+            } else {
+                fft_input[2*i] = 0; // Zero-padding
+            }
+            fft_input[2*i+1] = 0; // Imaginary part is zero for real signal
+        }
+        
+        // Perform FFT (simplified implementation using DFT for clarity)
+        for (int k = 0; k < *num_bins; k++) {
+            double real_sum = 0;
+            double imag_sum = 0;
+            
+            for (int n = 0; n < window_size; n++) {
+                double angle = -2 * M_PI * k * n / window_size;
+                real_sum += fft_input[2*n] * cos(angle) - fft_input[2*n+1] * sin(angle);
+                imag_sum += fft_input[2*n] * sin(angle) + fft_input[2*n+1] * cos(angle);
+            }
+            
+            // Compute magnitude
+            stft[frame][k] = sqrt(real_sum * real_sum + imag_sum * imag_sum);
+        }
+    }
+    
+    // Clean up
+    free(window);
+    free(fft_input);
+    
+    return stft;
+}
+
+// Function to compute Mel-frequency cepstral coefficients (MFCCs)
+double** compute_mfcc(double** stft, int num_frames, int num_bins, int num_mfccs, int sample_rate) {
+    if (!stft || num_frames <= 0 || num_bins <= 0 || num_mfccs <= 0 || sample_rate <= 0) {
+        fprintf(stderr, "Invalid parameters for MFCC\n");
+        return NULL;
+    }
+    
+    // Number of Mel filter banks
+    int num_mel_filters = 40;
+    
+    // Allocate memory for MFCCs
+    double** mfccs = (double**)malloc(num_frames * sizeof(double*));
+    if (!mfccs) {
+        fprintf(stderr, "Failed to allocate memory for MFCCs\n");
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_frames; i++) {
+        mfccs[i] = (double*)malloc(num_mfccs * sizeof(double));
+        if (!mfccs[i]) {
+            fprintf(stderr, "Failed to allocate memory for MFCC frame\n");
+            // Free already allocated memory
+            for (int j = 0; j < i; j++) {
+                free(mfccs[j]);
+            }
+            free(mfccs);
+            return NULL;
+        }
+    }
+    
+    // Create Mel filter banks
+    double** mel_filters = (double**)malloc(num_mel_filters * sizeof(double*));
+    if (!mel_filters) {
+        fprintf(stderr, "Failed to allocate memory for Mel filters\n");
+        for (int i = 0; i < num_frames; i++) {
+            free(mfccs[i]);
+        }
+        free(mfccs);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_mel_filters; i++) {
+        mel_filters[i] = (double*)calloc(num_bins, sizeof(double));
+        if (!mel_filters[i]) {
+            fprintf(stderr, "Failed to allocate memory for Mel filter\n");
+            for (int j = 0; j < i; j++) {
+                free(mel_filters[j]);
+            }
+            free(mel_filters);
+            for (int j = 0; j < num_frames; j++) {
+                free(mfccs[j]);
+            }
+            free(mfccs);
+            return NULL;
+        }
+    }
+    
+    // Convert frequencies to Mel scale
+    double mel_low = 1127.01048 * log(1 + 20.0 / 700.0);
+    double mel_high = 1127.01048 * log(1 + (sample_rate / 2.0) / 700.0);
+    double mel_step = (mel_high - mel_low) / (num_mel_filters + 1);
+    
+    // Compute center frequencies in Mel scale
+    double* mel_centers = (double*)malloc((num_mel_filters + 2) * sizeof(double));
+    if (!mel_centers) {
+        fprintf(stderr, "Failed to allocate memory for Mel centers\n");
+        for (int i = 0; i < num_mel_filters; i++) {
+            free(mel_filters[i]);
+        }
+        free(mel_filters);
+        for (int i = 0; i < num_frames; i++) {
+            free(mfccs[i]);
+        }
+        free(mfccs);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_mel_filters + 2; i++) {
+        mel_centers[i] = mel_low + i * mel_step;
+    }
+    
+    // Convert Mel centers back to frequency
+    double* freq_centers = (double*)malloc((num_mel_filters + 2) * sizeof(double));
+    if (!freq_centers) {
+        fprintf(stderr, "Failed to allocate memory for frequency centers\n");
+        free(mel_centers);
+        for (int i = 0; i < num_mel_filters; i++) {
+            free(mel_filters[i]);
+        }
+        free(mel_filters);
+        for (int i = 0; i < num_frames; i++) {
+            free(mfccs[i]);
+        }
+        free(mfccs);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_mel_filters + 2; i++) {
+        freq_centers[i] = 700.0 * (exp(mel_centers[i] / 1127.01048) - 1);
+    }
+    
+    // Convert frequency centers to FFT bin indices
+    int* bin_indices = (int*)malloc((num_mel_filters + 2) * sizeof(int));
+    if (!bin_indices) {
+        fprintf(stderr, "Failed to allocate memory for bin indices\n");
+        free(freq_centers);
+        free(mel_centers);
+        for (int i = 0; i < num_mel_filters; i++) {
+            free(mel_filters[i]);
+        }
+        free(mel_filters);
+        for (int i = 0; i < num_frames; i++) {
+            free(mfccs[i]);
+        }
+        free(mfccs);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_mel_filters + 2; i++) {
+        bin_indices[i] = (int)floor((num_bins - 1) * freq_centers[i] / (sample_rate / 2.0));
+        if (bin_indices[i] >= num_bins) bin_indices[i] = num_bins - 1;
+    }
+    
+    // Create triangular filters
+    for (int i = 0; i < num_mel_filters; i++) {
+        for (int j = bin_indices[i]; j <= bin_indices[i+1]; j++) {
+            mel_filters[i][j] = (j - bin_indices[i]) / (double)(bin_indices[i+1] - bin_indices[i]);
+        }
+        for (int j = bin_indices[i+1]; j <= bin_indices[i+2]; j++) {
+            mel_filters[i][j] = (bin_indices[i+2] - j) / (double)(bin_indices[i+2] - bin_indices[i+1]);
+        }
+    }
+    
+    // Apply Mel filter banks and compute MFCCs
+    for (int frame = 0; frame < num_frames; frame++) {
+        // Apply Mel filter banks
+        double* mel_energies = (double*)malloc(num_mel_filters * sizeof(double));
+        if (!mel_energies) {
+            fprintf(stderr, "Failed to allocate memory for Mel energies\n");
+            free(bin_indices);
+            free(freq_centers);
+            free(mel_centers);
+            for (int i = 0; i < num_mel_filters; i++) {
+                free(mel_filters[i]);
+            }
+            free(mel_filters);
+            for (int i = 0; i < num_frames; i++) {
+                free(mfccs[i]);
+            }
+            free(mfccs);
+            return NULL;
+        }
+        
+        for (int i = 0; i < num_mel_filters; i++) {
+            mel_energies[i] = 0;
+            for (int j = 0; j < num_bins; j++) {
+                mel_energies[i] += stft[frame][j] * mel_filters[i][j];
+            }
+            // Take log
+            if (mel_energies[i] > 0) {
+                mel_energies[i] = log(mel_energies[i]);
+            } else {
+                mel_energies[i] = -100; // A small value to represent log(0)
+            }
+        }
+        
+        // Compute DCT (simplified implementation)
+        for (int i = 0; i < num_mfccs; i++) {
+            mfccs[frame][i] = 0;
+            for (int j = 0; j < num_mel_filters; j++) {
+                mfccs[frame][i] += mel_energies[j] * cos(M_PI * i * (j + 0.5) / num_mel_filters);
+            }
+        }
+        
+        free(mel_energies);
+    }
+    
+    // Clean up
+    free(bin_indices);
+    free(freq_centers);
+    free(mel_centers);
+    for (int i = 0; i < num_mel_filters; i++) {
+        free(mel_filters[i]);
+    }
+    free(mel_filters);
+    
+    return mfccs;
+}
+
+// Function to detect onsets in audio signal
+double* detect_onsets(double* audio_data, int length, int hop_size, int* num_onsets) {
+    if (!audio_data || length <= 0 || hop_size <= 0) {
+        fprintf(stderr, "Invalid parameters for onset detection\n");
+        return NULL;
+    }
+    
+    // Compute energy per frame
+    int num_frames = 1 + (length - hop_size) / hop_size;
+    double* energy = (double*)malloc(num_frames * sizeof(double));
+    if (!energy) {
+        fprintf(stderr, "Failed to allocate memory for energy\n");
+        return NULL;
+    }
+    
+    for (int frame = 0; frame < num_frames; frame++) {
+        int frame_start = frame * hop_size;
+        int frame_end = frame_start + hop_size;
+        if (frame_end > length) frame_end = length;
+        
+        double frame_energy = 0;
+        for (int i = frame_start; i < frame_end; i++) {
+            frame_energy += audio_data[i] * audio_data[i];
+        }
+        energy[frame] = frame_energy / (frame_end - frame_start);
+    }
+    
+    // Compute energy difference
+    double* energy_diff = (double*)malloc((num_frames - 1) * sizeof(double));
+    if (!energy_diff) {
+        fprintf(stderr, "Failed to allocate memory for energy difference\n");
+        free(energy);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_frames - 1; i++) {
+        energy_diff[i] = energy[i+1] - energy[i];
+        if (energy_diff[i] < 0) energy_diff[i] = 0; // Only consider energy increases
+    }
+    
+    // Find peaks in energy difference
+    bool* is_peak = (bool*)calloc(num_frames - 1, sizeof(bool));
+    if (!is_peak) {
+        fprintf(stderr, "Failed to allocate memory for peak detection\n");
+        free(energy_diff);
+        free(energy);
+        return NULL;
+    }
+    
+    for (int i = 1; i < num_frames - 2; i++) {
+        if (energy_diff[i] > energy_diff[i-1] && energy_diff[i] > energy_diff[i+1] && 
+            energy_diff[i] > 0.1 * energy[i]) { // Threshold based on local energy
+            is_peak[i] = true;
+        }
+    }
+    
+    // Count onsets
+    *num_onsets = 0;
+    for (int i = 0; i < num_frames - 1; i++) {
+        if (is_peak[i]) (*num_onsets)++;
+    }
+    
+    // Create onsets array
+    double* onsets = (double*)malloc(*num_onsets * sizeof(double));
+    if (!onsets) {
+        fprintf(stderr, "Failed to allocate memory for onsets\n");
+        free(is_peak);
+        free(energy_diff);
+        free(energy);
+        return NULL;
+    }
+    
+    int onset_idx = 0;
+    for (int i = 0; i < num_frames - 1; i++) {
+        if (is_peak[i]) {
+            onsets[onset_idx++] = i * hop_size / (double)length; // Normalize to [0, 1]
+        }
+    }
+    
+    // Clean up
+    free(is_peak);
+    free(energy_diff);
+    free(energy);
+    
+    return onsets;
+}
+
+// Function to extract rhythm features
+double* extract_rhythm_features(double* onsets, int num_onsets) {
+    if (!onsets || num_onsets <= 1) {
+        fprintf(stderr, "Insufficient onsets for rhythm analysis\n");
+        return NULL;
+    }
+    
+    // Allocate memory for rhythm features
+    int num_features = 5; // tempo, regularity, complexity, pulse clarity, rhythmic variability
+    double* rhythm_features = (double*)malloc(num_features * sizeof(double));
+    if (!rhythm_features) {
+        fprintf(stderr, "Failed to allocate memory for rhythm features\n");
+        return NULL;
+    }
+    
+    // Compute inter-onset intervals
+    double* ioi = (double*)malloc((num_onsets - 1) * sizeof(double));
+    if (!ioi) {
+        fprintf(stderr, "Failed to allocate memory for inter-onset intervals\n");
+        free(rhythm_features);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_onsets - 1; i++) {
+        ioi[i] = onsets[i+1] - onsets[i];
+    }
+    
+    // Compute tempo (based on median IOI)
+    // Sort IOIs
+    double* ioi_sorted = (double*)malloc((num_onsets - 1) * sizeof(double));
+    if (!ioi_sorted) {
+        fprintf(stderr, "Failed to allocate memory for sorted IOIs\n");
+        free(ioi);
+        free(rhythm_features);
+        return NULL;
+    }
+    
+    memcpy(ioi_sorted, ioi, (num_onsets - 1) * sizeof(double));
+    for (int i = 0; i < num_onsets - 2; i++) {
+        for (int j = 0; j < num_onsets - 2 - i; j++) {
+            if (ioi_sorted[j] > ioi_sorted[j+1]) {
+                double temp = ioi_sorted[j];
+                ioi_sorted[j] = ioi_sorted[j+1];
+                ioi_sorted[j+1] = temp;
+            }
+        }
+    }
+    
+    double median_ioi = ioi_sorted[(num_onsets - 1) / 2];
+    double tempo = 60.0 / median_ioi; // Assuming onsets are in seconds
+    
+    // Compute regularity (coefficient of variation of IOIs)
+    double ioi_mean = 0;
+    for (int i = 0; i < num_onsets - 1; i++) {
+        ioi_mean += ioi[i];
+    }
+    ioi_mean /= (num_onsets - 1);
+    
+    double ioi_variance = 0;
+    for (int i = 0; i < num_onsets - 1; i++) {
+        double diff = ioi[i] - ioi_mean;
+        ioi_variance += diff * diff;
+    }
+    ioi_variance /= (num_onsets - 1);
+    
+    double ioi_std = sqrt(ioi_variance);
+    double regularity = 1.0 - (ioi_std / ioi_mean); // Higher value means more regular
+    if (regularity < 0) regularity = 0;
+    if (regularity > 1) regularity = 1;
+    
+    // Compute complexity (entropy of IOI distribution)
+    double* ioi_hist = (double*)calloc(10, sizeof(double)); // 10 bins
+    if (!ioi_hist) {
+        fprintf(stderr, "Failed to allocate memory for IOI histogram\n");
+        free(ioi_sorted);
+        free(ioi);
+        free(rhythm_features);
+        return NULL;
+    }
+    
+    double min_ioi = ioi_sorted[0];
+    double max_ioi = ioi_sorted[num_onsets - 2];
+    double ioi_range = max_ioi - min_ioi;
+    
+    if (ioi_range > 0) {
+        for (int i = 0; i < num_onsets - 1; i++) {
+            int bin = (int)(10 * (ioi[i] - min_ioi) / ioi_range);
+            if (bin >= 10) bin = 9;
+            ioi_hist[bin]++;
+        }
+        
+        // Normalize histogram
+        for (int i = 0; i < 10; i++) {
+            ioi_hist[i] /= (num_onsets - 1);
+        }
+        
+        // Compute entropy
+        double entropy = 0;
+        for (int i = 0; i < 10; i++) {
+            if (ioi_hist[i] > 0) {
+                entropy -= ioi_hist[i] * log2(ioi_hist[i]);
+            }
+        }
+        
+        // Normalize entropy to [0, 1]
+        double complexity = entropy / log2(10.0);
+        if (complexity > 1) complexity = 1;
+    } else {
+        // All IOIs are the same
+        double complexity = 0;
+    }
+    
+    // Compute pulse clarity (autocorrelation of onset sequence)
+    double* onset_signal = (double*)calloc(100, sizeof(double)); // Fixed length signal
+    if (!onset_signal) {
+        fprintf(stderr, "Failed to allocate memory for onset signal\n");
+        free(ioi_hist);
+        free(ioi_sorted);
+        free(ioi);
+        free(rhythm_features);
+        return NULL;
+    }
+    
+    for (int i = 0; i < num_onsets; i++) {
+        int bin = (int)(100 * onsets[i]);
+        if (bin < 100) onset_signal[bin] = 1.0;
+    }
+    
+    // Autocorrelation
+    double* autocorr = (double*)malloc(50 * sizeof(double)); // Half the signal length
+    if (!autocorr) {
+        fprintf(stderr, "Failed to allocate memory for autocorrelation\n");
+        free(onset_signal);
+        free(ioi_hist);
+        free(ioi_sorted);
+        free(ioi);
+        free(rhythm_features);
+        return NULL;
+    }
+    
+    for (int lag = 0; lag < 50; lag++) {
+        autocorr[lag] = 0;
+        for (int i = 0; i < 100 - lag; i++) {
+            autocorr[lag] += onset_signal[i] * onset_signal[i + lag];
+        }
+        autocorr[lag] /= (100 - lag);
+    }
+    
+    // Find maximum autocorrelation (excluding lag 0)
+    double max_autocorr = 0;
+    for (int lag = 1; lag < 50; lag++) {
+        if (autocorr[lag] > max_autocorr) {
+            max_autocorr = autocorr[lag];
+        }
+    }
+    
+    double pulse_clarity = max_autocorr; // Higher value means clearer pulse
+    
+    // Compute rhythmic variability (variation of onset distribution)
+    double onset_mean = 0;
+    for (int i = 0; i < num_onsets; i++) {
+        onset_mean += onsets[i];
+    }
+    onset_mean /= num_onsets;
+    
+    double onset_variance = 0;
+    for (int i = 0; i < num_onsets; i++) {
+        double diff = onsets[i] - onset_mean;
+        onset_variance += diff * diff;
+    }
+    onset_variance /= num_onsets;
+    
+    double rhythmic_variability = sqrt(onset_variance); // Lower value means less variability
+    rhythmic_variability = 1.0 - rhythmic_variability; // Invert so higher means more consistent
+    if (rhythmic_variability < 0) rhythmic_variability = 0;
+    if (rhythmic_variability > 1) rhythmic_variability = 1;
+    
+    // Set rhythm features
+    rhythm_features[0] = tempo / 200.0; // Normalize tempo, assuming max tempo is 200 bpm
+    if (rhythm_features[0] > 1) rhythm_features[0] = 1;
+    rhythm_features[1] = regularity;
+    rhythm_features[2] = ioi_range > 0 ? entropy / log2(10.0) : 0; // Complexity
+    rhythm_features[3] = pulse_clarity;
+    rhythm_features[4] = rhythmic_variability;
+    
+    // Clean up
+    free(autocorr);
+    free(onset_signal);
+    free(ioi_hist);
+    free(ioi_sorted);
+    free(ioi);
+    
+    return rhythm_features;
+}
+
+AudioPattern* analyze_audio_pattern(double* audio_data, int length, int sample_rate) {
+    if (!audio_data || length <= 0 || sample_rate <= 0) {
+        fprintf(stderr, "Invalid audio data\n");
+        return NULL;
+    }
+    
+    AudioPattern* pattern = (AudioPattern*)malloc(sizeof(AudioPattern));
+    if (!pattern) {
+        fprintf(stderr, "Failed to allocate memory for audio pattern\n");
+        return NULL;
+    }
+    
+    // Initialize pattern
+    memset(pattern, 0, sizeof(AudioPattern));
+    
+    // Copy waveform
+    pattern->waveform_length = length;
+    pattern->waveform = (double*)malloc(length * sizeof(double));
+    if (!pattern->waveform) {
+        fprintf(stderr, "Failed to allocate memory for waveform\n");
+        free(pattern);
+        return NULL;
+    }
+    memcpy(pattern->waveform, audio_data, length * sizeof(double));
+    
+    // Compute STFT
+    int window_size = 1024;
+    int hop_size = 512;
+    int num_frames, num_bins;
+    double** stft = compute_stft(audio_data, length, window_size, hop_size, &num_frames, &num_bins);
+    
+    if (stft) {
+        // Compute spectrum (average over frames)
+        pattern->spectrum_size = num_bins;
+        pattern->spectrum = (double*)calloc(pattern->spectrum_size, sizeof(double));
+        
+        if (pattern->spectrum) {
+            for (int frame = 0; frame < num_frames; frame++) {
+                for (int bin = 0; bin < num_bins; bin++) {
+                    pattern->spectrum[bin] += stft[frame][bin];
+                }
+            }
+            
+            // Normalize spectrum
+            for (int bin = 0; bin < num_bins; bin++) {
+                pattern->spectrum[bin] /= num_frames;
+            }
+        }
+        
+        // Compute MFCCs
+        int num_mfccs = 13;
+        double** mfccs = compute_mfcc(stft, num_frames, num_bins, num_mfccs, sample_rate);
+        
+        if (mfccs) {
+            // Average MFCCs over frames
+            pattern->num_mfcc = num_mfccs;
+            pattern->mfcc = (double*)calloc(pattern->num_mfcc, sizeof(double));
+            
+            if (pattern->mfcc) {
+                for (int frame = 0; frame < num_frames; frame++) {
+                    for (int i = 0; i < num_mfccs; i++) {
+                        pattern->mfcc[i] += mfccs[frame][i];
+                    }
+                }
+                
+                // Normalize MFCCs
+                for (int i = 0; i < num_mfccs; i++) {
+                    pattern->mfcc[i] /= num_frames;
+                }
+            }
+            
+            // Clean up MFCCs
+            for (int i = 0; i < num_frames; i++) {
+                free(mfccs[i]);
+            }
+            free(mfccs);
+        }
+        
+        // Clean up STFT
+        for (int i = 0; i < num_frames; i++) {
+            free(stft[i]);
+        }
+        free(stft);
+    }
+    
+    // Detect onsets
+    int num_onsets;
+    double* onsets = detect_onsets(audio_data, length, hop_size, &num_onsets);
+    
+    if (onsets && num_onsets > 1) {
+        // Extract rhythm features
+        pattern->num_onset_features = num_onsets;
+        pattern->onset_features = onsets;
+        
+        // Compute rhythm features
+        pattern->num_rhythm_features = 5;
+        pattern->rhythm_features = extract_rhythm_features(onsets, num_onsets);
+    }
+    
+    return pattern;
+}
+
+void free_audio_pattern(AudioPattern* pattern) {
+    if (!pattern) return;
+    
+    free(pattern->waveform);
+    free(pattern->spectrum);
+    free(pattern->mfcc);
+    free(pattern->onset_features);
+    free(pattern->rhythm_features);
+    free(pattern);
+}
+
+// Function to tokenize text
+char** tokenize_text(const char* text, int* num_tokens) {
+    if (!text || !num_tokens) return NULL;
+    
+    // Count tokens (approximate)
+    int max_tokens = 1;
+    for (const char* p = text; *p; p++) {
+        if (*p == ' ' || *p == '\t' || *p == '\n') {
+            max_tokens++;
+        }
+    }
+    
+    // Allocate memory for tokens
+    char** tokens = (char**)malloc(max_tokens * sizeof(char*));
+    if (!tokens) {
+        fprintf(stderr, "Failed to allocate memory for tokens\n");
+        return NULL;
+    }
+    
+    // Tokenize
+    *num_tokens = 0;
+    const char* start = text;
+    const char* end = text;
+    
+    while (*end) {
+        // Skip whitespace
+        while (*start && (*start == ' ' || *start == '\t' || *start == '\n')) {
+            start++;
+        }
+        
+        if (!*start) break; // End of text
+        
+        end = start;
+        
+        // Find end of token
+        while (*end && *end != ' ' && *end != '\t' && *end != '\n') {
+            end++;
+        }
+        
+        // Allocate and copy token
+        int token_length = end - start;
+        tokens[*num_tokens] = (char*)malloc((token_length + 1) * sizeof(char));
+        if (!tokens[*num_tokens]) {
+            fprintf(stderr, "Failed to allocate memory for token\n");
+            for (int i = 0; i < *num_tokens; i++) {
+                free(tokens[i]);
+            }
+            free(tokens);
+            return NULL;
+        }
+        
+        strncpy(tokens[*num_tokens], start, token_length);
+        tokens[*num_tokens][token_length] = '\0';
+        
+        (*num_tokens)++;
+        start = end;
+    }
+    
+    return tokens;
+}
+
+// Function to compute n-gram frequencies
+double* compute_ngram_frequencies(char** tokens, int num_tokens, int n, int* num_ngrams) {
+    if (!tokens || num_tokens <= 0 || n <= 0) {
+        fprintf(stderr, "Invalid parameters for n-gram computation\n");
+        return NULL;
+    }
+    
+    if (num_tokens < n) {
+        fprintf(stderr, "Not enough tokens for %d-grams\n", n);
+        return NULL;
+    }
+    
+    // Count unique n-grams
+    *num_ngrams = 0;
+    typedef struct {
+        char** tokens;
+        int count;
+    } NGram;
+    
+    NGram* ngrams = (NGram*)malloc((num_tokens - n + 1) * sizeof(NGram));
+    if (!ngrams) {
+        fprintf(stderr, "Failed to allocate memory for n-grams\n");
+        return NULL;
+    }
+    
+    for (int i = 0; i <= num_tokens - n; i++) {
+        // Check if this n-gram already exists
+        bool found = false;
+        for (int j = 0; j < *num_ngrams; j++) {
+            bool match = true;
+            for (int k = 0; k < n; k++) {
+                if (strcmp(tokens[i + k], ngrams[j].tokens[k]) != 0) {
+                    match = false;
+                    break;
+                }
+            }
+            
+            if (match) {
+                ngrams[j].count++;
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found) {
+            // Add new n-gram
+            ngrams[*num_ngrams].tokens = (char**)malloc(n * sizeof(char*));
+            if (!ngrams[*num_ngrams].tokens) {
+                fprintf(stderr, "Failed to allocate memory for n-gram tokens\n");
+                for (int j = 0; j < *num_ngrams; j++) {
+                    free(ngrams[j].tokens);
+                }
+                free(ngrams);
+                return NULL;
+            }
+            
+            for (int k = 0; k < n; k++) {
+                ngrams[*num_ngrams].tokens[k] = tokens[i + k];
+            }
+            
+            ngrams[*num_ngrams].count = 1;
+            (*num_ngrams)++;
+        }
+    }
+    
+    // Compute frequencies
+    double* frequencies = (double*)malloc(*num_ngrams * sizeof(double));
+    if (!frequencies) {
+        fprintf(stderr, "Failed to allocate memory for n-gram frequencies\n");
+        for (int i = 0; i < *num_ngrams; i++) {
+            free(ngrams[i].tokens);
+        }
+        free(ngrams);
+        return NULL;
+    }
+    
+    for (int i = 0; i < *num_ngrams; i++) {
+        frequencies[i] = (double)ngrams[i].count / (num_tokens - n + 1);
+    }
+    
+    // Clean up
+    for (int i = 0; i < *num_ngrams; i++) {
+        free(ngrams[i].tokens);
+    }
+    free(ngrams);
+    
+    return frequencies;
+}
+
+// Function to compute syntactic features
+double* compute_syntactic_features(char** tokens, int num_tokens, int* num_features) {
+    if (!tokens || num_tokens <= 0) {
+        fprintf(stderr, "Invalid parameters for syntactic feature computation\n");
+        return NULL;
+    }
+    
+    // Define part-of-speech categories
+    const char* noun_pos[] = {"NN", "NNS", "NNP", "NNPS"};
+    const char* verb_pos[] = {"VB", "VBD", "VBG", "VBN", "VBP", "VBZ"};
+    const char* adj_pos[] = {"JJ", "JJR", "JJS"};
+    const char* adv_pos[] = {"RB", "RBR", "RBS"};
+    const char* det_pos[] = {"DT", "PDT"};
+    const char* prep_pos[] = {"IN"};
+    const char* conj_pos[] = {"CC"};
+    
+    int num_noun_pos = sizeof(noun_pos) / sizeof(char*);
+    int num_verb_pos = sizeof(verb_pos) / sizeof(char*);
+    int num_adj_pos = sizeof(adj_pos) / sizeof(char*);
+    int num_adv_pos = sizeof(adv_pos) / sizeof(char*);
+    int num_det_pos = sizeof(det_pos) / sizeof(char*);
+    int num_prep_pos = sizeof(prep_pos) / sizeof(char*);
+    int num_conj_pos = sizeof(conj_pos) / sizeof(char*);
+    
+    // Allocate part-of-speech tags for tokens
+    char** pos_tags = (char**)malloc(num_tokens * sizeof(char*));
+    if (!pos_tags) {
+        fprintf(stderr, "Failed to allocate memory for part-of-speech tags\n");
+        return NULL;
+    }
+    
+    // Simulate part-of-speech tagging
+    for (int i = 0; i < num_tokens; i++) {
+        // Simple rule-based tagging (not accurate, just for demonstration)
+        const char* token = tokens[i];
+        int token_len = strlen(token);
+        
+        if (token_len > 2 && strcmp(token + token_len - 2, "ly") == 0) {
+            pos_tags[i] = strdup("RB"); // Adverb
+        } else if (token_len > 3 && strcmp(token + token_len - 3, "ing") == 0) {
+            pos_tags[i] = strdup("VBG"); // Verb gerund
+        } else if (token_len > 2 && strcmp(token + token_len - 2, "ed") == 0) {
+            pos_tags[i] = strdup("VBD"); // Verb past tense
+        } else if (token_len > 1 && strcmp(token + token_len - 1, "s") == 0) {
+            pos_tags[i] = strdup("NNS"); // Noun plural
+        } else if (strcmp(token, "the") == 0 || strcmp(token, "a") == 0 || strcmp(token, "an") == 0) {
+            pos_tags[i] = strdup("DT"); // Determiner
+        } else if (strcmp(token, "and") == 0 || strcmp(token, "or") == 0 || strcmp(token, "but") == 0) {
+            pos_tags[i] = strdup("CC"); // Conjunction
+        } else if (strcmp(token, "in") == 0 || strcmp(token, "on") == 0 || strcmp(token, "at") == 0) {
+            pos_tags[i] = strdup("IN"); // Preposition
+        } else {
+            pos_tags[i] = strdup("NN"); // Default to noun
+        }
+    }
+    
+    // Define syntactic features
+    *num_features = 7; // noun ratio, verb ratio, adj ratio, adv ratio, det ratio, prep ratio, conj ratio
+    double* features = (double*)calloc(*num_features, sizeof(double));
+    if (!features) {
+        fprintf(stderr, "Failed to allocate memory for syntactic features\n");
+        for (int i = 0; i < num_tokens; i++) {
+            free(pos_tags[i]);
+        }
+        free(pos_tags);
+        return NULL;
+    }
+    
+    // Compute POS ratios
+    for (int i = 0; i < num_tokens; i++) {
+        bool is_noun = false, is_verb = false, is_adj = false, is_adv = false, is_det = false, is_prep = false, is_conj = false;
+        
+        for (int j = 0; j < num_noun_pos; j++) {
+            if (strcmp(pos_tags[i], noun_pos[j]) == 0) {
+                is_noun = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_verb_pos; j++) {
+            if (strcmp(pos_tags[i], verb_pos[j]) == 0) {
+                is_verb = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_adj_pos; j++) {
+            if (strcmp(pos_tags[i], adj_pos[j]) == 0) {
+                is_adj = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_adv_pos; j++) {
+            if (strcmp(pos_tags[i], adv_pos[j]) == 0) {
+                is_adv = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_det_pos; j++) {
+            if (strcmp(pos_tags[i], det_pos[j]) == 0) {
+                is_det = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_prep_pos; j++) {
+            if (strcmp(pos_tags[i], prep_pos[j]) == 0) {
+                is_prep = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_conj_pos; j++) {
+            if (strcmp(pos_tags[i], conj_pos[j]) == 0) {
+                is_conj = true;
+                break;
+            }
+        }
+        
+        if (is_noun) features[0]++;
+        if (is_verb) features[1]++;
+        if (is_adj) features[2]++;
+        if (is_adv) features[3]++;
+        if (is_det) features[4]++;
+        if (is_prep) features[5]++;
+        if (is_conj) features[6]++;
+    }
+    
+    // Normalize by token count
+    for (int i = 0; i < *num_features; i++) {
+        features[i] /= num_tokens;
+    }
+    
+    // Clean up
+    for (int i = 0; i < num_tokens; i++) {
+        free(pos_tags[i]);
+    }
+    free(pos_tags);
+    
+    return features;
+}
+
+// Function to compute semantic features (simplified)
+double* compute_semantic_features(char** tokens, int num_tokens, int* num_features) {
+    if (!tokens || num_tokens <= 0) {
+        fprintf(stderr, "Invalid parameters for semantic feature computation\n");
+        return NULL;
+    }
+    
+    // Define semantic categories
+    const char* positive_words[] = {"good", "great", "excellent", "wonderful", "amazing", "best", "happy", "joy", "love"};
+    const char* negative_words[] = {"bad", "terrible", "awful", "horrible", "worst", "sad", "unhappy", "hate", "anger"};
+    const char* concrete_words[] = {"table", "chair", "house", "car", "tree", "dog", "cat", "book", "water", "food"};
+    const char* abstract_words[] = {"idea", "concept", "theory", "thought", "knowledge", "freedom", "happiness", "truth", "beauty", "justice"};
+    const char* technical_words[] = {"algorithm", "computer", "system", "data", "network", "software", "hardware", "code", "program", "analysis"};
+    
+    int num_positive = sizeof(positive_words) / sizeof(char*);
+    int num_negative = sizeof(negative_words) / sizeof(char*);
+    int num_concrete = sizeof(concrete_words) / sizeof(char*);
+    int num_abstract = sizeof(abstract_words) / sizeof(char*);
+    int num_technical = sizeof(technical_words) / sizeof(char*);
+    
+    // Define semantic features
+    *num_features = 6; // positive ratio, negative ratio, concrete ratio, abstract ratio, technical ratio, semantic diversity
+    double* features = (double*)calloc(*num_features, sizeof(double));
+    if (!features) {
+        fprintf(stderr, "Failed to allocate memory for semantic features\n");
+        return NULL;
+    }
+    
+    // Compute semantic category ratios
+    for (int i = 0; i < num_tokens; i++) {
+        bool is_positive = false, is_negative = false, is_concrete = false, is_abstract = false, is_technical = false;
+        
+        for (int j = 0; j < num_positive; j++) {
+            if (strcmp(tokens[i], positive_words[j]) == 0) {
+                is_positive = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_negative; j++) {
+            if (strcmp(tokens[i], negative_words[j]) == 0) {
+                is_negative = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_concrete; j++) {
+            if (strcmp(tokens[i], concrete_words[j]) == 0) {
+                is_concrete = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_abstract; j++) {
+            if (strcmp(tokens[i], abstract_words[j]) == 0) {
+                is_abstract = true;
+                break;
+            }
+        }
+        
+        for (int j = 0; j < num_technical; j++) {
+            if (strcmp(tokens[i], technical_words[j]) == 0) {
+                is_technical = true;
+                break;
+            }
+        }
+        
+        if (is_positive) features[0]++;
+        if (is_negative) features[1]++;
+        if (is_concrete) features[2]++;
+        if (is_abstract) features[3]++;
+        if (is_technical) features[4]++;
+    }
+    
+    // Normalize by token count
+    for (int i = 0; i < 5; i++) {
+        features[i] /= num_tokens;
+    }
+    
+    // Compute semantic diversity (ratio of unique tokens)
+    int num_unique = 0;
+    for (int i = 0; i < num_tokens; i++) {
+        bool is_unique = true;
+        for (int j = 0; j < i; j++) {
+            if (strcmp(tokens[i], tokens[j]) == 0) {
+                is_unique = false;
+                break;
+            }
+        }
+        if (is_unique) num_unique++;
+    }
+    
+    features[5] = (double)num_unique / num_tokens;
+    
+    return features;
+}
+
+TextPattern* analyze_text_pattern(const char* text, int text_length) {
+    if (!text || text_length <= 0) {
+        fprintf(stderr, "Invalid text data\n");
+        return NULL;
+    }
+    
+    TextPattern* pattern = (TextPattern*)malloc(sizeof(TextPattern));
+    if (!pattern) {
+        fprintf(stderr, "Failed to allocate memory for text pattern\n");
+        return NULL;
+    }
+    
+    // Initialize pattern
+    memset(pattern, 0, sizeof(TextPattern));
+    
+    // Tokenize text
+    int num_tokens;
+    pattern->tokens = tokenize_text(text, &num_tokens);
+    pattern->num_tokens = num_tokens;
+    
+    if (!pattern->tokens) {
+        fprintf(stderr, "Failed to tokenize text\n");
+        free(pattern);
+        return NULL;
+    }
+    
+    // Compute n-gram frequencies
+    int n = 2; // bi-grams
+    int num_ngrams;
+    pattern->ngram_frequencies = compute_ngram_frequencies(pattern->tokens, pattern->num_tokens, n, &num_ngrams);
+    pattern->num_ngrams = num_ngrams;
+    
+    // Compute syntactic features
+    int num_syntactic_features;
+    pattern->syntactic_features = compute_syntactic_features(pattern->tokens, pattern->num_tokens, &num_syntactic_features);
+    pattern->num_syntactic_features = num_syntactic_features;
+    
+    // Compute semantic features
+    int num_semantic_features;
+    pattern->semantic_features = compute_semantic_features(pattern->tokens, pattern->num_tokens, &num_semantic_features);
+    pattern->num_semantic_features = num_semantic_features;
+    
+    // For demonstration purposes, create simple word embeddings (not realistic)
+    pattern->embedding_dim = 5;
+    pattern->word_embeddings = (double*)calloc(pattern->num_tokens * pattern->embedding_dim, sizeof(double));
+    
+    if (pattern->word_embeddings) {
+        for (int i = 0; i < pattern->num_tokens; i++) {
+            // Simple hash-based embedding
+            unsigned int hash = 0;
+            for (const char* p = pattern->tokens[i]; *p; p++) {
+                hash = hash * 31 + *p;
+            }
+            
+            for (int j = 0; j < pattern->embedding_dim; j++) {
+                pattern->word_embeddings[i * pattern->embedding_dim + j] = ((hash >> j) & 1) ? 1.0 : -1.0;
+            }
+        }
+    }
+    
+    return pattern;
+}
+
+void free_text_pattern(TextPattern* pattern) {
+    if (!pattern) return;
+    
+    if (pattern->tokens) {
+        for (int i = 0; i < pattern->num_tokens; i++) {
+            free(pattern->tokens[i]);
+        }
+        free(pattern->tokens);
+    }
+    
+    free(pattern->word_embeddings);
+    free(pattern->ngram_frequencies);
+    free(pattern->syntactic_features);
+    free(pattern->semantic_features);
+    free(pattern);
+}
+
+// Compute DFT (Discrete Fourier Transform)
+void compute_dft(const double* time_series, int length, double* amplitudes, double* phases) {
+    for (int k = 0; k < length; k++) {
+        double real_sum = 0.0;
+        double imag_sum = 0.0;
+        
+        for (int n = 0; n < length; n++) {
+            double angle = -2.0 * M_PI * k * n / length;
+            real_sum += time_series[n] * cos(angle);
+            imag_sum += time_series[n] * sin(angle);
+        }
+        
+        amplitudes[k] = sqrt(real_sum * real_sum + imag_sum * imag_sum) / length;
+        phases[k] = atan2(imag_sum, real_sum);
+    }
+}
+
+// Compute wavelet transform using Haar wavelets
+void compute_haar_wavelet_transform(const double* data, int length, double* coefficients) {
+    // Copy data to coefficients
+    memcpy(coefficients, data, length * sizeof(double));
+    
+    // Perform wavelet transform
+    int h = length;
+    while (h > 1) {
+        h /= 2;
+        
+        // Compute averages and differences
+        for (int i = 0; i < h; i++) {
+            double avg = (coefficients[2*i] + coefficients[2*i+1]) / 2.0;
+            double diff = (coefficients[2*i] - coefficients[2*i+1]) / 2.0;
+            
+            coefficients[i] = avg;
+            coefficients[i+h] = diff;
+        }
+    }
+}
+
+// Function to compute statistical features of time series
+double* compute_statistical_features(const double* time_series, int length, int* num_features) {
+    if (!time_series || length <= 0 || !num_features) {
+        fprintf(stderr, "Invalid parameters for statistical feature computation\n");
+        return NULL;
+    }
+    
+    *num_features = 10; // mean, variance, skewness, kurtosis, min, max, range, median, IQR, entropy
+    double* features = (double*)calloc(*num_features, sizeof(double));
+    if (!features) {
+        fprintf(stderr, "Failed to allocate memory for statistical features\n");
+        return NULL;
+    }
+    
+    // Compute mean
+    double mean = 0.0;
+    for (int i = 0; i < length; i++) {
+        mean += time_series[i];
+    }
+    mean /= length;
+    features[0] = mean;
+    
+    // Compute variance, skewness, kurtosis
+    double variance = 0.0, skewness = 0.0, kurtosis = 0.0;
+    for (int i = 0; i < length; i++) {
+        double diff = time_series[i] - mean;
+        double diff2 = diff * diff;
+        variance += diff2;
+        skewness += diff * diff2;
+        kurtosis += diff2 * diff2;
+    }
+    variance /= length;
+    skewness = (skewness / length) / pow(variance, 1.5);
+    kurtosis = (kurtosis / length) / (variance * variance) - 3.0; // Excess kurtosis
+    
+    features[1] = variance;
+    features[2] = skewness;
+    features[3] = kurtosis;
+    
+    // Compute min, max, range
+    double min_val = time_series[0];
+    double max_val = time_series[0];
+    
+    for (int i = 1; i < length; i++) {
+        if (time_series[i] < min_val) min_val = time_series[i];
+        if (time_series[i] > max_val) max_val = time_series[i];
+    }
+    
+    features[4] = min_val;
+    features[5] = max_val;
+    features[6] = max_val - min_val;
+    
+    // Compute median and IQR
+    double* sorted = (double*)malloc(length * sizeof(double));
+    if (!sorted) {
+        fprintf(stderr, "Failed to allocate memory for sorted array\n");
+        free(features);
+        return NULL;
+    }
+    
+    memcpy(sorted, time_series, length * sizeof(double));
+    
+    // Sort
+    for (int i = 0; i < length - 1; i++) {
+        for (int j = 0; j < length - i - 1; j++) {
+            if (sorted[j] > sorted[j+1]) {
+                double temp = sorted[j];
+                sorted[j] = sorted[j+1];
+                sorted[j+1] = temp;
+            }
+        }
+    }
+    
+    // Compute median
+    if (length % 2 == 0) {
+        features[7] = (sorted[length/2 - 1] + sorted[length/2]) / 2.0;
+    } else {
+        features[7] = sorted[length/2];
+    }
+    
+    // Compute IQR (Interquartile Range)
+    int q1_idx = length / 4;
+    int q3_idx = 3 * length / 4;
+    
+    features[8] = sorted[q3_idx] - sorted[q1_idx];
+    
+    // Compute entropy
+    // First, create histogram
+    int num_bins = 10;
+    int* histogram = (int*)calloc(num_bins, sizeof(int));
+    
+    if (!histogram) {
+        fprintf(stderr, "Failed to allocate memory for histogram\n");
+        free(sorted);
+        free(features);
+        return NULL;
+    }
+    
+    for (int i = 0; i < length; i++) {
+        int bin = (int)((time_series[i] - min_val) / (max_val - min_val) * num_bins);
+        if (bin >= num_bins) bin = num_bins - 1;
+        histogram[bin]++;
+    }
+    
+    // Compute entropy
+    double entropy = 0.0;
+    for (int i = 0; i < num_bins; i++) {
+        double p = (double)histogram[i] / length;
+        if (p > 0) {
+            entropy -= p * log2(p);
+        }
+    }
+    
+    features[9] = entropy;
+    
+    // Clean up
+    free(histogram);
+    free(sorted);
+    
+    return features;
+}
+
+// Function to compute complexity measures of time series
+double* compute_complexity_measures(const double* time_series, int length, int* num_measures) {
+    if (!time_series || length <= 0 || !num_measures) {
+        fprintf(stderr, "Invalid parameters for complexity measure computation\n");
+        return NULL;
+    }
+    
+    *num_measures = 5; // Approximate entropy, Sample entropy, Fractal dimension, Hurst exponent, Lyapunov exponent
+    double* measures = (double*)calloc(*num_measures, sizeof(double));
+    if (!measures) {
+        fprintf(stderr, "Failed to allocate memory for complexity measures\n");
+        return NULL;
+    }
+    
+    // Approximate Entropy
+    double ApEn(const double* time_series, int length, int m, double r) {
+        int N = length - m + 1;
+        double* phi_m = (double*)malloc(N * sizeof(double));
+        double* phi_m_plus_1 = (double*)malloc((N - 1) * sizeof(double));
+        
+        if (!phi_m || !phi_m_plus_1) {
+            fprintf(stderr, "Failed to allocate memory for ApEn computation\n");
+            if (phi_m) free(phi_m);
+            if (phi_m_plus_1) free(phi_m_plus_1);
+            return 0.0;
+        }
+        
+        // Compute phi(m)
+        for (int i = 0; i < N; i++) {
+            int count = 0;
+            for (int j = 0; j < N; j++) {
+                bool match = true;
+                for (int k = 0; k < m; k++) {
+                    if (fabs(time_series[i+k] - time_series[j+k]) > r) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) count++;
+            }
+            phi_m[i] = (double)count / N;
+        }
+        
+        // Compute phi(m+1)
+        for (int i = 0; i < N - 1; i++) {
+            int count = 0;
+            for (int j = 0; j < N - 1; j++) {
+                bool match = true;
+                for (int k = 0; k < m + 1; k++) {
+                    if (fabs(time_series[i+k] - time_series[j+k]) > r) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) count++;
+            }
+            phi_m_plus_1[i] = (double)count / (N - 1);
+        }
+        
+        // Compute ApEn
+        double sum_phi_m = 0.0;
+        double sum_phi_m_plus_1 = 0.0;
+        
+        for (int i = 0; i < N; i++) {
+            if (phi_m[i] > 0) {
+                sum_phi_m += log(phi_m[i]);
+            }
+        }
+        
+        for (int i = 0; i < N - 1; i++) {
+            if (phi_m_plus_1[i] > 0) {
+                sum_phi_m_plus_1 += log(phi_m_plus_1[i]);
+            }
+        }
+        
+        double apen = (sum_phi_m / N) - (sum_phi_m_plus_1 / (N - 1));
+        
+        free(phi_m);
+        free(phi_m_plus_1);
+        
+        return apen;
+    }
+    
+    // Fractal dimension using box-counting method
+    double FractalDimension(const double* time_series, int length) {
+        if (length < 2) return 1.0;
+        
+        // Normalize time series to [0, 1]
+        double min_val = time_series[0];
+        double max_val = time_series[0];
+        
+        for (int i = 1; i < length; i++) {
+            if (time_series[i] < min_val) min_val = time_series[i];
+            if (time_series[i] > max_val) max_val = time_series[i];
+        }
+        
+        double range = max_val - min_val;
+        if (range == 0) return 1.0;
+        
+        double* normalized = (double*)malloc(length * sizeof(double));
+        if (!normalized) {
+            fprintf(stderr, "Failed to allocate memory for normalized time series\n");
+            return 1.0;
+        }
+        
+        for (int i = 0; i < length; i++) {
+            normalized[i] = (time_series[i] - min_val) / range;
+        }
+        
+        // Compute box counts at different scales
+        int num_scales = 10;
+        double* scales = (double*)malloc(num_scales * sizeof(double));
+        double* counts = (double*)malloc(num_scales * sizeof(double));
+        
+        if (!scales || !counts) {
+            fprintf(stderr, "Failed to allocate memory for box counting\n");
+            free(normalized);
+            if (scales) free(scales);
+            if (counts) free(counts);
+            return 1.0;
+        }
+        
+        for (int i = 0; i < num_scales; i++) {
+            scales[i] = pow(2.0, -(i+1));
+            int num_boxes = (int)(1.0 / scales[i]);
+            
+            bool* boxes = (bool*)calloc(num_boxes * num_boxes, sizeof(bool));
+            if (!boxes) {
+                fprintf(stderr, "Failed to allocate memory for boxes\n");
+                free(normalized);
+                free(scales);
+                free(counts);
+                return 1.0;
+            }
+            
+            for (int j = 0; j < length - 1; j++) {
+                int x1 = (int)(normalized[j] / scales[i]);
+                int y1 = (int)(((double)j / length) / scales[i]);
